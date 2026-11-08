@@ -49,7 +49,7 @@ if ! aws cloudformation describe-stacks --stack-name "$STACK" --region "$REGION"
 fi
 [[ -n "${GITHUB_RELAY_TOKEN:-}" ]] && OVERRIDES+=(GitHubToken="$GITHUB_RELAY_TOKEN")
 
-echo "Deploying $STACK…"
+echo "Deploying ${STACK}…"
 aws cloudformation deploy --stack-name "$STACK" --region "$REGION" \
   --template-file infra/publish.yaml --capabilities CAPABILITY_IAM \
   --no-fail-on-empty-changeset --tags Project=naturedex-contentstack \
