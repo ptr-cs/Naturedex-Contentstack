@@ -1,8 +1,8 @@
-# AWS deployment preparation
+# AWS deployment reference
 
 Naturedex's AWS artifact is the static Astro `dist/` directory. Contentstack remains a separately managed SaaS CMS. A developer pulls published content into `data/content.json`, validates it, and builds the same pages used locally. AWS does not run Contentstack, Drupal, PHP, a database, or an application server for this version.
 
-Nothing here has deployed resources, authenticated to AWS, or changed the existing Site. The commands below are for a later deployment you choose to perform.
+The site is deployed with `npm run deploy:aws` (see the README) and updated by GitHub Actions (see [publish to live](publishing.md) and [architecture](architecture.md)). This page is the manual reference: what the template creates, a custom domain, rollback and cleanup.
 
 ## Prepare and review locally
 

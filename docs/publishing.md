@@ -37,7 +37,8 @@ The deploy role can only read the site stack's outputs, write objects in the sit
 5. In Contentstack, open **Settings → Webhooks → + New Webhook**:
    - **URL:** the printed webhook URL
    - **Authentication:** Basic Auth, username `contentstack`, the printed password
-   - **Trigger conditions:** entries published, unpublished and deleted, in your delivery environment
+   - **Scope:** branch-level, branch `main`
+   - **Trigger conditions:** Entry → Published, Unpublished and Deleted, in your delivery environment. Leave **Updated** off: it fires on every draft save, which doesn't change the public site.
 6. Publish an entry. In GitHub's Actions tab, a Deploy run should start within seconds.
 
 Rerunning setup is safe. It keeps the existing webhook password and GitHub token. To replace the token, set `GITHUB_RELAY_TOKEN` when you rerun.

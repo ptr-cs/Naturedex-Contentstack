@@ -20,7 +20,9 @@ The checked-in snapshot currently has source "seed". It preserves all 24 species
 
 The default command performs zero network requests and shows an offline proposal. The apply command reads existing content first, creates missing content types and entries, and leaves existing entries unchanged. It never updates, deletes or publishes content. It imports from data/content.json so the fourth existing field note is retained. A matching existing stable ID is skipped even if its content differs; a slug belonging to another ID blocks the import. An incompatible top-level model blocks rather than being overwritten. This is a bootstrap importer for a fresh compatible stack, not a complete nested-schema migration or schema-diff tool. A partial network failure can leave some new drafts; rerunning reconciles missing records.
 
-No Contentstack account, token, import or remote mutation was performed while implementing this integration.
+The project's own stack (EU region) was set up with these steps: `cms:import -- --apply` created both content types, 24 species and 4 field notes, which were then published from the dashboard.
+
+Two Contentstack behaviours to know about: the field name `region_ids` is reserved, so the species regions field is `habitat_regions`; and list endpoints leave out `count` when a list is empty, which the importer and pull treat as zero.
 
 ## Content model
 

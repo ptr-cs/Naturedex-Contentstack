@@ -4,6 +4,16 @@ The first Naturedex CMS comparison: **Contentstack + Astro + React + TypeScript*
 
 Astro generates HTML for every route. React supplies filtering, map selection, dialogs, motion controls, and browser-local discoveries. Contentstack owns wildlife entries, blog posts, references, user accounts, roles, drafts, and publishing. There is no application database or custom login service.
 
+**Live:** https://d2bo5f1eb7smry.cloudfront.net ([status](https://d2bo5f1eb7smry.cloudfront.net/status/))
+
+Publishing an entry in Contentstack rebuilds and redeploys the site automatically, usually within 2–4 minutes:
+
+```
+Contentstack publish ─▶ webhook ─▶ AWS Lambda relay ─▶ GitHub Actions ─▶ S3 + CloudFront
+```
+
+See [architecture](docs/architecture.md) for diagrams of every part, the publish sequence and where each credential lives.
+
 ## Run locally
 
 Use Node 24 and npm:
@@ -20,19 +30,23 @@ npm run build
 npm run preview
 ```
 
-`data/content.json` is the single build input for local development and AWS. It currently contains a **seed snapshot**, preserved from the original project. It is not evidence of an active Contentstack connection. No Contentstack account has been modified, and nothing has been deployed to AWS.
+`data/content.json` is the single build input for local development and AWS. It holds the content last pulled from Contentstack (`"source": "contentstack"`). Run `npm run cms:pull` to refresh it. The original seed data was imported into Contentstack and is no longer used directly.
 
 ## Connect the CMS
 
-Follow [Contentstack setup](docs/contentstack.md) to create a stack and environment, import the provided structured models and seed entries, and publish them. Keep credentials in a local, ignored `.env` file:
+The project uses a Contentstack stack in the **EU region** (`CONTENTSTACK_REGION=aws-eu`, editor at https://eu-app.contentstack.com). To connect your own stack, follow [Contentstack setup](docs/contentstack.md). Keep credentials in a local, ignored `.env` file:
 
 ```sh
 cp .env.example .env
-# Fill in the stack's delivery settings locally.
+# Fill in the API key, delivery token, environment and region.
+npm run cms:import             # offline dry run: lists what would be created
+npm run cms:import -- --apply  # creates missing content types and entries (needs a management token)
+# Publish the entries in Contentstack (species first, then field notes).
 npm run cms:pull
-npm run build
 npm run preview
 ```
+
+`cms:import --apply` only creates what is missing. It never updates, deletes or publishes. The management token is only needed for this step and stays in `.env`.
 
 `cms:pull` reads published content from the real Content Delivery API and atomically replaces the snapshot. Missing credentials, invalid content, and API failures stop the sync; they do not substitute seed data. All posts and species use the same typed content contract in either environment.
 
@@ -56,7 +70,9 @@ npm run deploy:aws            # stack + build + upload + CloudFront invalidation
 npm run deploy:aws -- destroy # remove the stack and its bucket
 ```
 
-The script creates or updates the `naturedex-contentstack` CloudFormation stack (S3 + CloudFront, `us-east-1`), builds with `SITE_URL` set to the distribution's URL, scans the artifact, uploads it, and prints the live URL. Override the stack or region with `NATUREDEX_STACK` / `NATUREDEX_REGION`. A seed snapshot deploys as a preview. After `cms:pull`, the same command also runs the release provenance check. Rerun it after each pull to publish CMS changes.
+The script creates or updates the `naturedex-contentstack` CloudFormation stack (S3 + CloudFront, `us-east-1`), runs the unit tests, builds with `SITE_URL` set to the distribution's URL, scans the artifact, uploads it, and prints the live URL. Override the stack or region with `NATUREDEX_STACK` / `NATUREDEX_REGION`. A Contentstack snapshot also has to pass the release provenance check; a seed snapshot deploys as a labelled preview.
+
+Day to day you don't need this command: content publishes and pushes to `main` deploy through GitHub Actions. Run it from your machine only to change the infrastructure in `infra/aws.yaml`.
 
 ## System status
 
@@ -64,18 +80,19 @@ The script creates or updates the `naturedex-contentstack` CloudFormation stack 
 
 ## Publish to live
 
-Once set up, publishing in Contentstack updates the public site automatically, usually within 2–4 minutes. A webhook starts a GitHub Actions deploy through a small AWS Lambda relay. Drafts are not shown on the public site. See [publish to live](docs/publishing.md) for setup and security notes.
+Publishing, unpublishing or deleting an entry in Contentstack updates the public site automatically, usually within 2–4 minutes. A Contentstack webhook calls a small AWS Lambda relay, which starts the GitHub Actions **Deploy** workflow. Pushes to `main` deploy the same way, and you can start a run by hand from the Actions tab.
 
-## Prepare an AWS release (manual steps)
+Only published content appears on the site. Saving a draft does nothing; seeing drafts before publishing would need Contentstack Live Preview, which this setup does not include. See [publish to live](docs/publishing.md) for setup, security notes and cost.
+
+## Custom domain (not set up)
+
+The site is served from its CloudFront address. To use your own hostname, for example `naturedex-contentstack.ptr-cs.com`, see [AWS deployment](docs/aws-deployment.md) for the certificate and DNS steps, then build with that `SITE_URL`:
 
 ```sh
-npm run cms:pull
 SITE_URL=https://naturedex-contentstack.ptr-cs.com npm run build:release
 ```
 
-The hostname above is an example subdomain of your existing domain; choose the actual hostname before release. No DNS record has been created. The release guard rejects an untouched seed snapshot and requires a public HTTPS site URL. The output is `dist/`, served identically by the local preview and AWS static hosting. The post-build scan checks for configured token values and unexpected backend/secret files.
-
-[AWS deployment instructions](docs/aws-deployment.md) cover the supplied CloudFormation template, private S3 bucket, CloudFront distribution, optional custom domain, content refreshes, rollback, cleanup, and cost considerations. **Those instructions are preparation only; no AWS resources have been created.** Contentstack is a separate managed service; AWS hosts the frontend.
+The release guard rejects a seed snapshot and requires a public HTTPS site URL. The post-build scan checks for configured token values and unexpected backend or secret files.
 
 ## Main files
 
@@ -85,11 +102,17 @@ The hostname above is an example subdomain of your existing domain; choose the a
 | `src/pages/` | Static routes, journal pages, sitemap, and RSS |
 | `src/lib/content.ts` | Shared runtime validation and snapshot loader |
 | `src/lib/contentstack.ts` | Published-content adapter |
+| `src/lib/status.ts` | Build-time data for `/status/` |
 | `contentstack/` | Native CMS model definitions |
 | `scripts/contentstack/` | Explicit import and published-content sync tools |
 | `data/content.json` | Current public build snapshot |
 | `public/` | Local art, map, and licensed font |
-| `infra/aws.yaml` | Undeployed AWS infrastructure definition |
+| `infra/aws.yaml` | Site hosting: S3 + CloudFront |
+| `infra/publish.yaml` | Webhook relay and GitHub deploy role (generated from `infra/publish-relay.js`) |
+| `scripts/deploy-aws.sh` | Test, build, scan, upload and invalidate |
+| `scripts/setup-publishing.sh` | One-time publish-to-live setup |
+| `.github/workflows/deploy.yml` | Deploy on publish, push to `main` or manual run |
+| `docs/architecture.md` | Diagrams and credential map |
 
 The original `Naturedex` directory is unchanged. No Drupal, D1, Vinext, or ChatGPT Sites runtime is used by this variation.
 
