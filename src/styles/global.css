@@ -1314,9 +1314,14 @@ main {
   border-top: 1px solid #d2dac7;
   margin-top: 18px;
   display: grid;
-  gap: 9px;
+  gap: 4px;
 }
+/* WCAG 2.2 target size: at least 24px tall, whatever the platform's font metrics. */
 .source-links a {
+  display: flex;
+  align-items: center;
+  min-height: 24px;
+  justify-self: start;
   font-size: 10px;
   color: #42613a;
   text-decoration: underline;

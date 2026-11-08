@@ -1,13 +1,13 @@
 import { validateContentSnapshot, type ContentSnapshot } from './content.ts';
 
 export const regionEndpoints = {
-  'aws-na': { delivery: 'https://cdn.contentstack.io', management: 'https://api.contentstack.io' },
-  'aws-eu': { delivery: 'https://eu-cdn.contentstack.com', management: 'https://eu-api.contentstack.com' },
-  'aws-au': { delivery: 'https://au-cdn.contentstack.com', management: 'https://au-api.contentstack.com' },
-  'azure-na': { delivery: 'https://azure-na-cdn.contentstack.com', management: 'https://azure-na-api.contentstack.com' },
-  'azure-eu': { delivery: 'https://azure-eu-cdn.contentstack.com', management: 'https://azure-eu-api.contentstack.com' },
-  'gcp-na': { delivery: 'https://gcp-na-cdn.contentstack.com', management: 'https://gcp-na-api.contentstack.com' },
-  'gcp-eu': { delivery: 'https://gcp-eu-cdn.contentstack.com', management: 'https://gcp-eu-api.contentstack.com' },
+  'aws-na': { delivery: 'https://cdn.contentstack.io', management: 'https://api.contentstack.io', editor: 'https://app.contentstack.com/' },
+  'aws-eu': { delivery: 'https://eu-cdn.contentstack.com', management: 'https://eu-api.contentstack.com', editor: 'https://eu-app.contentstack.com/' },
+  'aws-au': { delivery: 'https://au-cdn.contentstack.com', management: 'https://au-api.contentstack.com', editor: 'https://au-app.contentstack.com/' },
+  'azure-na': { delivery: 'https://azure-na-cdn.contentstack.com', management: 'https://azure-na-api.contentstack.com', editor: 'https://azure-na-app.contentstack.com/' },
+  'azure-eu': { delivery: 'https://azure-eu-cdn.contentstack.com', management: 'https://azure-eu-api.contentstack.com', editor: 'https://azure-eu-app.contentstack.com/' },
+  'gcp-na': { delivery: 'https://gcp-na-cdn.contentstack.com', management: 'https://gcp-na-api.contentstack.com', editor: 'https://gcp-na-app.contentstack.com/' },
+  'gcp-eu': { delivery: 'https://gcp-eu-cdn.contentstack.com', management: 'https://gcp-eu-api.contentstack.com', editor: 'https://gcp-eu-app.contentstack.com/' },
 } as const;
 export type ContentstackRegion = keyof typeof regionEndpoints;
 export type ContentType = 'species' | 'blog_post';
@@ -16,6 +16,22 @@ type Environment = Record<string, string | undefined>;
 export interface BaseConfig { apiKey: string; region: ContentstackRegion; locale: string; branch?: string }
 export interface ContentstackConfig extends BaseConfig { deliveryToken: string; environment: string }
 export interface ManagementConfig extends BaseConfig { managementToken: string }
+
+/**
+ * The "Open Contentstack" link. CONTENTSTACK_EDITOR_URL wins when set; otherwise
+ * it follows CONTENTSTACK_REGION, so local and CI builds always agree.
+ */
+export function editorUrl(env: Environment): string {
+  const explicit = env.CONTENTSTACK_EDITOR_URL?.trim();
+  if (explicit) {
+    const url = new URL(explicit);
+    if (url.protocol !== 'https:' || url.username || url.password) throw new Error('CONTENTSTACK_EDITOR_URL must be an HTTPS URL without credentials.');
+    return url.href;
+  }
+  const region = env.CONTENTSTACK_REGION?.trim() || 'aws-na';
+  if (!Object.hasOwn(regionEndpoints, region)) throw new Error('Unsupported CONTENTSTACK_REGION. Use a documented regional identifier.');
+  return regionEndpoints[region as ContentstackRegion].editor;
+}
 
 function required(env: Environment, key: string): string {
   const value = env[key]?.trim();

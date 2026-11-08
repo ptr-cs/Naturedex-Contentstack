@@ -4,7 +4,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { readContentSnapshot } from '../../src/lib/content.ts';
 import {
-  contentstackRequest, fetchPublishedEntries, getContentstackConfig,
+  contentstackRequest, editorUrl, fetchPublishedEntries, getContentstackConfig,
   getManagementConfig, normalizeContentstackEntries, pullContentstack,
   regionEndpoints, type CmsEntry,
 } from '../../src/lib/contentstack.ts';
@@ -49,6 +49,17 @@ describe('Contentstack configuration and transport boundaries', () => {
     { CONTENTSTACK_API_KEY: 'bad\r\nheader' },
   ])('rejects invalid delivery configuration without echoing values: %j', (change) => {
     expect(() => getContentstackConfig({ ...env, ...change })).toThrow();
+  });
+
+  it('links to the editor for the configured region unless an explicit editor URL is given', () => {
+    expect(editorUrl({})).toBe('https://app.contentstack.com/');
+    expect(editorUrl({ CONTENTSTACK_REGION: 'aws-eu' })).toBe('https://eu-app.contentstack.com/');
+    expect(editorUrl({ CONTENTSTACK_REGION: 'azure-na' })).toBe('https://azure-na-app.contentstack.com/');
+    expect(editorUrl({ CONTENTSTACK_REGION: 'aws-eu', CONTENTSTACK_EDITOR_URL: ' ' })).toBe('https://eu-app.contentstack.com/');
+    expect(editorUrl({ CONTENTSTACK_REGION: 'aws-eu', CONTENTSTACK_EDITOR_URL: 'https://example.com/stack' })).toBe('https://example.com/stack');
+    expect(() => editorUrl({ CONTENTSTACK_EDITOR_URL: 'http://app.contentstack.com/' })).toThrow('HTTPS');
+    expect(() => editorUrl({ CONTENTSTACK_EDITOR_URL: 'https://user:pw@app.contentstack.com/' })).toThrow('credentials');
+    expect(() => editorUrl({ CONTENTSTACK_REGION: 'mars' })).toThrow('Unsupported');
   });
 
   it('requires an explicit management token', () => {

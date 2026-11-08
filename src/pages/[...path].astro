@@ -3,6 +3,7 @@ import Naturedex from '../components/Naturedex';
 import Page from '../layouts/Page.astro';
 import { readContentSnapshot } from '../lib/content';
 import { buildStatus } from '../lib/status';
+import { editorUrl } from '../lib/contentstack';
 
 export async function getStaticPaths() {
   const snapshot = readContentSnapshot();
@@ -14,9 +15,8 @@ const { snapshot } = Astro.props;
 const currentPath = Astro.params.path ? `/${Astro.params.path}` : '/';
 const article = snapshot.posts.find(post => currentPath === `/journal/${post.slug}`);
 const title = article?.title || ({ '/': 'Virginia field guide', '/map': 'Region map', '/journal': 'Field journal', '/editor': 'Writing desk', '/about': 'About the field guide', '/status': 'System status' }[currentPath] ?? 'Naturedex');
-const cmsUrl = import.meta.env.CONTENTSTACK_EDITOR_URL || 'https://app.contentstack.com/';
-const editorOrigin = new URL(cmsUrl);
-if (editorOrigin.protocol !== 'https:' || editorOrigin.username || editorOrigin.password) throw new Error('CONTENTSTACK_EDITOR_URL must be an HTTPS URL without credentials.');
+// Shell variables (CI) override .env (local), matching Vite's own precedence.
+const cmsUrl = editorUrl({ ...import.meta.env, ...process.env });
 const status = currentPath === '/status' ? buildStatus(snapshot) : undefined;
 ---
 <Page title={title} description={article?.excerpt} noindex={currentPath === '/editor' || currentPath === '/status'}>

@@ -111,7 +111,7 @@ test('the writing desk hands authoring to native Contentstack without a custom e
   await waitForHydration(page);
   await expect(page.getByRole('heading', { name: 'Your writing desk.', exact: true })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'A home for your field notes.', exact: true })).toBeVisible();
-  await expect(page.getByRole('link', { name: 'Open Contentstack', exact: true })).toHaveAttribute('href', 'https://app.contentstack.com/');
+  await expect(page.getByRole('link', { name: 'Open Contentstack', exact: true })).toHaveAttribute('href', /^https:\/\/(?:[a-z]+(?:-[a-z]+)?-)?app\.contentstack\.com\/$/);
   await expect(page.getByRole('button', { name: 'New post', exact: true })).toHaveCount(0);
   await expect(page.locator('form')).toHaveCount(0);
 });

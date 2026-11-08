@@ -168,7 +168,8 @@ scenario('the authoring portal links to native Contentstack without local editin
   await go(driver, '/editor/');
   await role(driver, 'heading', 'Your writing desk.');
   await role(driver, 'heading', 'A home for your field notes.');
-  assert.equal(await (await role(driver, 'link', 'Open Contentstack')).getAttribute('href'), 'https://app.contentstack.com/');
+  // The host follows the build's CONTENTSTACK_REGION (app., eu-app., azure-na-app., ...).
+  assert.match(await (await role(driver, 'link', 'Open Contentstack')).getAttribute('href'), /^https:\/\/(?:[a-z]+(?:-[a-z]+)?-)?app\.contentstack\.com\/$/);
   assert.equal((await driver.findElements(By.css('form,input[type="password"]'))).length, 0);
 });
 
