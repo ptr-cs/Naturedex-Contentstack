@@ -1,0 +1,173 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1460 790" width="1460" height="790" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" role="img" aria-labelledby="t d">
+  <title id="t">Naturedex · Contentstack architecture</title>
+  <desc id="d">An editor publishes in Contentstack. A webhook calls an AWS Lambda relay, which starts a GitHub Actions deploy. The workflow pulls published content, tests and builds the site, then uploads it to a private S3 bucket and refreshes CloudFront, which serves visitors.</desc>
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#3d4a42"/></marker>
+    <marker id="ag" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#8a948d"/></marker>
+    <filter id="s" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="0" dy="1.5" stdDeviation="2" flood-color="#000" flood-opacity="0.12"/></filter>
+    <style>
+      .h { font-size: 15px; font-weight: 700; letter-spacing: .02em; }
+      .hs { font-size: 12px; font-weight: 500; opacity: .75; }
+      .n { font-size: 14px; font-weight: 650; fill: #1f2a24; text-anchor: middle; }
+      .ns { font-size: 12px; fill: #5b665f; text-anchor: middle; }
+      .l { font-size: 12.5px; fill: #2f3a33; font-weight: 550; }
+      .lg { font-size: 12px; fill: #6f7a73; font-style: italic; }
+      .badge circle { fill: #254b3b; }
+      .badge text { fill: #fff; font-size: 12px; font-weight: 700; text-anchor: middle; }
+      .ar { fill: none; stroke: #3d4a42; stroke-width: 2.2; marker-end: url(#a); }
+      .ar2 { fill: none; stroke: #8a948d; stroke-width: 2; stroke-dasharray: 6 5; marker-end: url(#ag); }
+      .ic { fill: none; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+    </style>
+  </defs>
+
+  <rect width="1460" height="790" fill="#fbfaf6"/>
+
+  <!-- Title -->
+  <text x="40" y="50" font-size="24" font-weight="750" fill="#254b3b">How a publish reaches the site</text>
+  <text x="40" y="76" font-size="14" fill="#5b665f">Naturedex · Contentstack edition. Static site, rebuilt automatically on every publish, live in about 2–4 minutes.</text>
+
+  <!-- Zones -->
+  <g filter="url(#s)">
+    <rect x="180" y="110" width="300" height="600" rx="16" fill="#f3f0ff" stroke="#b9adf5"/>
+    <rect x="540" y="110" width="220" height="250" rx="16" fill="#fff6ea" stroke="#f0c48a"/>
+    <rect x="820" y="110" width="600" height="250" rx="16" fill="#f3f5f7" stroke="#c4ccd4"/>
+    <rect x="540" y="450" width="800" height="260" rx="16" fill="#fff6ea" stroke="#f0c48a"/>
+  </g>
+  <text x="200" y="140" class="h" fill="#5643c9">CONTENTSTACK</text><text x="200" y="158" class="hs" fill="#5643c9">EU region · the CMS</text>
+  <text x="560" y="140" class="h" fill="#b45f06">AWS</text><text x="560" y="158" class="hs" fill="#b45f06">publish relay</text>
+  <text x="840" y="140" class="h" fill="#24292f">GITHUB</text><text x="840" y="158" class="hs" fill="#24292f">code and the build pipeline</text>
+  <text x="560" y="480" class="h" fill="#b45f06">AWS</text><text x="560" y="498" class="hs" fill="#b45f06">hosting · us-east-1</text>
+
+  <!-- Arrows (drawn under nodes) -->
+  <!-- 1 editor -> stack -->
+  <path class="ar" d="M134,226 L288,218"/>
+  <!-- 2 stack -> webhook -->
+  <path class="ar" d="M330,300 L330,362"/>
+  <!-- 3 webhook -> lambda -->
+  <path class="ar" d="M358,372 C 430,300 520,226 610,225"/>
+  <!-- 4 lambda -> actions -->
+  <path class="ar" d="M688,225 L918,225"/>
+  <!-- push alternative: repo -> actions -->
+  <path class="ar2" d="M1222,225 L1002,225"/>
+  <!-- 5 delivery -> actions (content flows to the build) -->
+  <path class="ar" d="M372,590 C 470,590 470,405 570,405 L935,405 L935,312"/>
+  <!-- 6 actions -> role -->
+  <path class="ar" d="M992,312 L992,527"/>
+  <!-- 7 role -> s3, role -> cloudfront -->
+  <path class="ar" d="M952,565 L800,565"/>
+  <path class="ar" d="M1032,565 L1140,565"/>
+  <!-- origin: s3 -> cloudfront -->
+  <path class="ar2" d="M762,640 C 780,690 1160,690 1180,640"/>
+  <!-- 8 visitor -> cloudfront -->
+  <path class="ar" d="M1368,565 L1222,565"/>
+
+  <!-- Arrow labels and step badges -->
+  <g class="badge"><circle cx="190" cy="200" r="11"/><text x="190" y="204">1</text></g>
+  <text x="140" y="262" class="l">publishes</text>
+
+  <g class="badge"><circle cx="352" cy="331" r="11"/><text x="352" y="335">2</text></g>
+
+  <g class="badge"><circle cx="470" cy="276" r="11"/><text x="470" y="280">3</text></g>
+  <text x="488" y="270" class="l">POST +</text><text x="488" y="286" class="l">password</text>
+
+  <g class="badge"><circle cx="740" cy="205" r="11"/><text x="740" y="209">4</text></g>
+  <text x="758" y="209" class="l">start workflow</text>
+
+  <text x="1050" y="212" class="lg">or a push to main</text>
+
+  <g class="badge"><circle cx="640" cy="405" r="11"/><text x="640" y="409">5</text></g>
+  <text x="660" y="397" class="l">pull published content (read-only token)</text>
+
+  <g class="badge"><circle cx="992" cy="395" r="11" /><text x="992" y="399">6</text></g>
+  <text x="1010" y="430" class="l">assume role</text><text x="1010" y="446" class="l">(OIDC, short-lived)</text>
+
+  <g class="badge"><circle cx="876" cy="545" r="11"/><text x="876" y="549">7</text></g>
+  <text x="840" y="590" class="l">upload</text>
+  <text x="1052" y="590" class="l">refresh cache</text>
+
+  <text x="895" y="696" class="lg">private origin: only CloudFront can read the bucket</text>
+
+  <g class="badge"><circle cx="1295" cy="545" r="11"/><text x="1295" y="549">8</text></g>
+  <text x="1268" y="590" class="l">HTTPS</text>
+
+  <!-- Nodes -->
+  <!-- Editor -->
+  <g transform="translate(100,226)">
+    <circle r="32" fill="#fff" stroke="#254b3b" stroke-width="2"/>
+    <g class="ic" stroke="#254b3b"><circle cx="0" cy="-8" r="7"/><path d="M-13,15 C-13,3 13,3 13,15"/></g>
+  </g>
+  <text x="100" y="290" class="n">Editor</text>
+
+  <!-- Stack -->
+  <g transform="translate(330,218)">
+    <circle r="34" fill="#fff" stroke="#7a68e8" stroke-width="2"/>
+    <g class="ic" stroke="#5643c9"><path d="M0,-14 L16,-6 L0,2 L-16,-6 Z"/><path d="M-16,1 L0,9 L16,1"/><path d="M-16,8 L0,16 L16,8"/></g>
+  </g>
+  <text x="330" y="272" class="n">Stack</text><text x="330" y="289" class="ns">species · field notes</text>
+
+  <!-- Webhook -->
+  <g transform="translate(330,400)">
+    <circle r="34" fill="#fff" stroke="#7a68e8" stroke-width="2"/>
+    <path d="M3,-17 L-9,3 L0,3 L-3,17 L10,-4 L1,-4 Z" fill="#5643c9" stroke="#5643c9" stroke-width="1.5" stroke-linejoin="round"/>
+  </g>
+  <text x="330" y="454" class="n">Webhook</text><text x="330" y="471" class="ns">publish · unpublish · delete</text>
+
+  <!-- Delivery API -->
+  <g transform="translate(330,590)">
+    <circle r="34" fill="#fff" stroke="#7a68e8" stroke-width="2"/>
+    <g class="ic" stroke="#5643c9"><path d="M-14,4 C-20,4 -20,-7 -12,-7 C-11,-15 3,-17 5,-8 C13,-10 17,4 9,4"/><path d="M-2,-1 L-2,15 M-7,10 L-2,15 L3,10"/></g>
+  </g>
+  <text x="330" y="644" class="n">Delivery API</text><text x="330" y="661" class="ns">published entries only</text>
+
+  <!-- Lambda -->
+  <g transform="translate(650,225)">
+    <circle r="34" fill="#fff" stroke="#e8933a" stroke-width="2"/>
+    <text x="0" y="11" font-size="32" font-weight="700" fill="#b45f06" text-anchor="middle" font-family="Georgia, serif">λ</text>
+  </g>
+  <text x="650" y="279" class="n">Lambda relay</text><text x="650" y="296" class="ns">checks the password</text>
+
+  <!-- Actions -->
+  <g transform="translate(960,225)">
+    <circle r="34" fill="#fff" stroke="#57606a" stroke-width="2"/>
+    <g class="ic" stroke="#24292f"><circle r="15"/><path d="M-5,-8 L9,0 L-5,8 Z" fill="#24292f"/></g>
+  </g>
+  <text x="960" y="279" class="n">Deploy workflow</text><text x="960" y="296" class="ns">test · build · scan</text>
+
+  <!-- Repo -->
+  <g transform="translate(1260,225)">
+    <circle r="34" fill="#fff" stroke="#57606a" stroke-width="2"/>
+    <g class="ic" stroke="#24292f"><circle cx="-7" cy="-11" r="4"/><circle cx="-7" cy="12" r="4"/><circle cx="8" cy="-5" r="4"/><path d="M-7,-7 L-7,8 M8,-1 C8,6 -7,4 -7,8"/></g>
+  </g>
+  <text x="1260" y="279" class="n">Repository</text><text x="1260" y="296" class="ns">main branch</text>
+
+  <!-- Deploy role -->
+  <g transform="translate(992,565)">
+    <circle r="34" fill="#fff" stroke="#e8933a" stroke-width="2"/>
+    <g class="ic" stroke="#b45f06"><circle cx="-7" cy="0" r="7"/><path d="M0,0 L16,0 M11,0 L11,6 M15,0 L15,5"/></g>
+  </g>
+  <text x="992" y="619" class="n">Deploy role</text><text x="992" y="636" class="ns">no stored AWS keys</text>
+
+  <!-- S3 -->
+  <g transform="translate(762,565)">
+    <circle r="34" fill="#fff" stroke="#e8933a" stroke-width="2"/>
+    <g class="ic" stroke="#b45f06"><ellipse cx="0" cy="-10" rx="14" ry="5"/><path d="M-14,-10 L-10,14 C-6,18 6,18 10,14 L14,-10"/></g>
+  </g>
+  <text x="762" y="619" class="n">S3 bucket</text><text x="762" y="636" class="ns">private site files</text>
+
+  <!-- CloudFront -->
+  <g transform="translate(1180,565)">
+    <circle r="34" fill="#fff" stroke="#e8933a" stroke-width="2"/>
+    <g class="ic" stroke="#b45f06"><circle r="15"/><ellipse rx="6.5" ry="15"/><path d="M-15,0 L15,0 M-12,-8 L12,-8 M-12,8 L12,8"/></g>
+  </g>
+  <text x="1180" y="619" class="n">CloudFront</text><text x="1180" y="636" class="ns">HTTPS · global cache</text>
+
+  <!-- Visitor -->
+  <g transform="translate(1400,565)">
+    <circle r="32" fill="#fff" stroke="#254b3b" stroke-width="2"/>
+    <g class="ic" stroke="#254b3b"><rect x="-14" y="-12" width="28" height="19" rx="2"/><path d="M-6,13 L6,13 M0,7 L0,13"/></g>
+  </g>
+  <text x="1400" y="619" class="n">Visitors</text>
+
+  <!-- Footer -->
+  <text x="40" y="752" font-size="12.5" fill="#5b665f">Drafts never reach the site. A failed check stops the deploy and the previous version stays live. Infrastructure changes are made separately from a developer machine (npm run deploy:aws).</text>
+</svg>

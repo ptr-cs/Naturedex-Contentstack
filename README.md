@@ -12,6 +12,8 @@ Publishing an entry in Contentstack rebuilds and redeploys the site automaticall
 Contentstack publish ─▶ webhook ─▶ AWS Lambda relay ─▶ GitHub Actions ─▶ S3 + CloudFront
 ```
 
+![How a publish reaches the site](docs/architecture.svg)
+
 See [architecture](docs/architecture.md) for diagrams of every part, the publish sequence and where each credential lives.
 
 ## Run locally

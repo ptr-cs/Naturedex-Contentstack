@@ -2,6 +2,8 @@
 
 Naturedex is a static site. Contentstack holds the content, GitHub Actions turns published content into HTML, and AWS serves the result. Visitors' browsers never contact Contentstack, GitHub or the AWS APIs. They only fetch files from CloudFront.
 
+![How a publish reaches the site: editor publishes in Contentstack, webhook calls a Lambda relay, GitHub Actions pulls content, tests and builds, then uploads to S3 and refreshes CloudFront for visitors](architecture.svg)
+
 ## System overview
 
 ```mermaid
