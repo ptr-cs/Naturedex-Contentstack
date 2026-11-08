@@ -1,0 +1,30 @@
+---
+import '../styles/global.css';
+interface Props { title: string; description?: string; noindex?: boolean; }
+const { title, description = 'Meet Virginia’s wildlife through original animated pixel art, an interactive region map, and field notes for the curious.', noindex = false } = Astro.props;
+const canonical = new URL(Astro.url.pathname, Astro.site);
+---
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content={description} />
+    <meta name="theme-color" content="#254b3b" />
+    {noindex && <meta name="robots" content="noindex,follow" />}
+    <title>{title} · Naturedex</title>
+    <link rel="canonical" href={canonical} />
+    <meta property="og:title" content={`${title} · Naturedex`} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:type" content="website" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="alternate" type="application/rss+xml" title="Naturedex field journal" href="/rss.xml" />
+    <link rel="preload" href="/fonts/Silkscreen-Regular.ttf" as="font" type="font/ttf" crossorigin />
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to main content</a>
+    <noscript><p class="no-script">The guide and journal are readable here. Enable JavaScript to filter wildlife, explore the map, and save discoveries in this browser.</p></noscript>
+    <slot />
+  </body>
+</html>

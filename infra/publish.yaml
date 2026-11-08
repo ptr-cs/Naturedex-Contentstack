@@ -1,0 +1,335 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Description": "Naturedex publish-to-live: GitHub Actions deploy role (OIDC) and a Contentstack webhook relay that starts the deploy workflow.",
+  "Parameters": {
+    "Repository": {
+      "Type": "String",
+      "AllowedPattern": "^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$",
+      "Description": "GitHub repository as owner/name."
+    },
+    "OidcRepository": {
+      "Type": "String",
+      "Default": "",
+      "Description": "Repository as it appears in the OIDC subject, if different (e.g. owner@123/name@456). Blank uses Repository."
+    },
+    "ExistingOidcProviderArn": {
+      "Type": "String",
+      "Default": "",
+      "Description": "ARN of an existing token.actions.githubusercontent.com provider. An account may only have one; blank creates it."
+    },
+    "SiteStackName": {
+      "Type": "String",
+      "Default": "naturedex-contentstack"
+    },
+    "BucketName": {
+      "Type": "String",
+      "Description": "BucketName output of the site stack."
+    },
+    "DistributionId": {
+      "Type": "String",
+      "AllowedPattern": "^[A-Z0-9]+$",
+      "Description": "DistributionId output of the site stack."
+    },
+    "GitHubToken": {
+      "Type": "String",
+      "NoEcho": true,
+      "MinLength": 20,
+      "Description": "Fine-grained token for this repository only, with Actions: read and write."
+    },
+    "WebhookPassword": {
+      "Type": "String",
+      "NoEcho": true,
+      "MinLength": 24,
+      "Description": "Basic Auth password Contentstack sends with the webhook."
+    },
+    "WorkflowFile": {
+      "Type": "String",
+      "Default": "deploy.yml"
+    },
+    "Branch": {
+      "Type": "String",
+      "Default": "main"
+    }
+  },
+  "Conditions": {
+    "CreateOidcProvider": {
+      "Fn::Equals": [
+        {
+          "Ref": "ExistingOidcProviderArn"
+        },
+        ""
+      ]
+    },
+    "UseRepositoryForOidc": {
+      "Fn::Equals": [
+        {
+          "Ref": "OidcRepository"
+        },
+        ""
+      ]
+    }
+  },
+  "Resources": {
+    "GitHubOidcProvider": {
+      "Type": "AWS::IAM::OIDCProvider",
+      "Condition": "CreateOidcProvider",
+      "Properties": {
+        "Url": "https://token.actions.githubusercontent.com",
+        "ClientIdList": [
+          "sts.amazonaws.com"
+        ]
+      }
+    },
+    "DeployRole": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "Description": "GitHub Actions uploads the Naturedex static site. Content only; infrastructure changes stay manual.",
+        "MaxSessionDuration": 3600,
+        "AssumeRolePolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Principal": {
+                "Federated": {
+                  "Fn::If": [
+                    "CreateOidcProvider",
+                    {
+                      "Ref": "GitHubOidcProvider"
+                    },
+                    {
+                      "Ref": "ExistingOidcProviderArn"
+                    }
+                  ]
+                }
+              },
+              "Action": "sts:AssumeRoleWithWebIdentity",
+              "Condition": {
+                "StringEquals": {
+                  "token.actions.githubusercontent.com:aud": "sts.amazonaws.com",
+                  "token.actions.githubusercontent.com:sub": {
+                    "Fn::Join": [
+                      "",
+                      [
+                        "repo:",
+                        {
+                          "Fn::If": [
+                            "UseRepositoryForOidc",
+                            {
+                              "Ref": "Repository"
+                            },
+                            {
+                              "Ref": "OidcRepository"
+                            }
+                          ]
+                        },
+                        ":environment:production"
+                      ]
+                    ]
+                  }
+                }
+              }
+            }
+          ]
+        },
+        "Policies": [
+          {
+            "PolicyName": "upload-site",
+            "PolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Sid": "ReadSiteOutputs",
+                  "Effect": "Allow",
+                  "Action": "cloudformation:DescribeStacks",
+                  "Resource": {
+                    "Fn::Sub": "arn:${AWS::Partition}:cloudformation:${AWS::Region}:${AWS::AccountId}:stack/${SiteStackName}/*"
+                  }
+                },
+                {
+                  "Sid": "ListBucket",
+                  "Effect": "Allow",
+                  "Action": "s3:ListBucket",
+                  "Resource": {
+                    "Fn::Sub": "arn:${AWS::Partition}:s3:::${BucketName}"
+                  }
+                },
+                {
+                  "Sid": "WriteObjects",
+                  "Effect": "Allow",
+                  "Action": [
+                    "s3:GetObject",
+                    "s3:PutObject",
+                    "s3:DeleteObject"
+                  ],
+                  "Resource": {
+                    "Fn::Sub": "arn:${AWS::Partition}:s3:::${BucketName}/*"
+                  }
+                },
+                {
+                  "Sid": "Invalidate",
+                  "Effect": "Allow",
+                  "Action": [
+                    "cloudfront:CreateInvalidation",
+                    "cloudfront:GetInvalidation"
+                  ],
+                  "Resource": {
+                    "Fn::Sub": "arn:${AWS::Partition}:cloudfront::${AWS::AccountId}:distribution/${DistributionId}"
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "RelayLogGroup": {
+      "Type": "AWS::Logs::LogGroup",
+      "DeletionPolicy": "Delete",
+      "Properties": {
+        "RetentionInDays": 14
+      }
+    },
+    "RelayRole": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com"
+              },
+              "Action": "sts:AssumeRole"
+            }
+          ]
+        },
+        "Policies": [
+          {
+            "PolicyName": "write-logs",
+            "PolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "logs:CreateLogStream",
+                    "logs:PutLogEvents"
+                  ],
+                  "Resource": {
+                    "Fn::GetAtt": [
+                      "RelayLogGroup",
+                      "Arn"
+                    ]
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "RelayFunction": {
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "Description": "Contentstack publish webhook -> GitHub deploy workflow.",
+        "Runtime": "nodejs24.x",
+        "Architectures": [
+          "arm64"
+        ],
+        "Handler": "index.handler",
+        "MemorySize": 128,
+        "Timeout": 10,
+        "Role": {
+          "Fn::GetAtt": [
+            "RelayRole",
+            "Arn"
+          ]
+        },
+        "LoggingConfig": {
+          "LogGroup": {
+            "Ref": "RelayLogGroup"
+          }
+        },
+        "Environment": {
+          "Variables": {
+            "WEBHOOK_USER": "contentstack",
+            "WEBHOOK_PASSWORD": {
+              "Ref": "WebhookPassword"
+            },
+            "GITHUB_TOKEN": {
+              "Ref": "GitHubToken"
+            },
+            "GITHUB_REPOSITORY": {
+              "Ref": "Repository"
+            },
+            "GITHUB_WORKFLOW": {
+              "Ref": "WorkflowFile"
+            },
+            "GITHUB_REF": {
+              "Ref": "Branch"
+            }
+          }
+        },
+        "Code": {
+          "ZipFile": "'use strict';\n// Contentstack webhook -> GitHub workflow_dispatch. Contentstack cannot send\n// GitHub's request body, so this relay checks the webhook's Basic Auth and\n// starts the deploy workflow. It forwards nothing from the webhook payload.\nconst { timingSafeEqual } = require('node:crypto');\n\nfunction same(a, b) {\n  const x = Buffer.from(String(a));\n  const y = Buffer.from(String(b));\n  return x.length === y.length && timingSafeEqual(x, y);\n}\n\nexports.handler = async (event) => {\n  const env = process.env;\n  const method = event && event.requestContext && event.requestContext.http && event.requestContext.http.method;\n  if (method !== 'POST') return { statusCode: 405 };\n  const header = (event.headers && event.headers.authorization) || '';\n  const expected = 'Basic ' + Buffer.from(env.WEBHOOK_USER + ':' + env.WEBHOOK_PASSWORD).toString('base64');\n  if (!same(header, expected)) return { statusCode: 401 };\n  const url = 'https://api.github.com/repos/' + env.GITHUB_REPOSITORY + '/actions/workflows/' + env.GITHUB_WORKFLOW + '/dispatches';\n  let response;\n  try {\n    response = await fetch(url, {\n      method: 'POST',\n      headers: {\n        Authorization: 'Bearer ' + env.GITHUB_TOKEN,\n        Accept: 'application/vnd.github+json',\n        'Content-Type': 'application/json',\n        'User-Agent': 'naturedex-publish-relay',\n        'X-GitHub-Api-Version': '2022-11-28',\n      },\n      body: JSON.stringify({ ref: env.GITHUB_REF }),\n      redirect: 'error',\n      signal: AbortSignal.timeout(8000),\n    });\n  } catch (error) {\n    console.error('GitHub dispatch request failed');\n    return { statusCode: 502 };\n  }\n  if (!response.ok) {\n    console.error('GitHub dispatch returned HTTP ' + response.status);\n    return { statusCode: 502 };\n  }\n  return { statusCode: 204 };\n};\n"
+        }
+      }
+    },
+    "RelayUrl": {
+      "Type": "AWS::Lambda::Url",
+      "Properties": {
+        "AuthType": "NONE",
+        "TargetFunctionArn": {
+          "Fn::GetAtt": [
+            "RelayFunction",
+            "Arn"
+          ]
+        }
+      }
+    },
+    "RelayUrlPermission": {
+      "Type": "AWS::Lambda::Permission",
+      "Properties": {
+        "Action": "lambda:InvokeFunctionUrl",
+        "FunctionName": {
+          "Ref": "RelayFunction"
+        },
+        "Principal": "*",
+        "FunctionUrlAuthType": "NONE"
+      }
+    },
+    "RelayInvokePermission": {
+      "Type": "AWS::Lambda::Permission",
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Ref": "RelayFunction"
+        },
+        "Principal": "*",
+        "InvokedViaFunctionUrl": true
+      }
+    }
+  },
+  "Outputs": {
+    "DeployRoleArn": {
+      "Value": {
+        "Fn::GetAtt": [
+          "DeployRole",
+          "Arn"
+        ]
+      },
+      "Description": "Set as the GitHub variable AWS_DEPLOY_ROLE_ARN."
+    },
+    "WebhookUrl": {
+      "Value": {
+        "Fn::GetAtt": [
+          "RelayUrl",
+          "FunctionUrl"
+        ]
+      },
+      "Description": "Contentstack webhook URL (Basic Auth user: contentstack)."
+    }
+  }
+}

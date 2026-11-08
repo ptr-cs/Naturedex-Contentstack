@@ -1,0 +1,122 @@
+{
+  "white-tailed-deer": {
+    "description": "The raised white tail gives a small alert flick; the eye briefly closes.",
+    "frames": 3,
+    "duration": 5.8
+  },
+  "black-bear": {
+    "description": "One rounded ear settles a pixel before a slow blink.",
+    "frames": 3,
+    "duration": 6.2
+  },
+  "red-fox": {
+    "description": "The white-tipped brush flicks upward while the fox gives a quick blink.",
+    "frames": 3,
+    "duration": 5.2
+  },
+  "river-otter": {
+    "description": "The narrow tail tip sweeps gently upward, followed by a blink.",
+    "frames": 3,
+    "duration": 5.6
+  },
+  "northern-cardinal": {
+    "description": "The pointed tail feathers make a small upward flick; the bird blinks.",
+    "frames": 3,
+    "duration": 5.1
+  },
+  "bald-eagle": {
+    "description": "The outer wing feathers settle a pixel while the head stays steady, then the eye closes.",
+    "frames": 3,
+    "duration": 6
+  },
+  "great-blue-heron": {
+    "description": "A tiny crest twitch and a watchful blink preserve the still hunting posture.",
+    "frames": 3,
+    "duration": 6.4
+  },
+  "pileated-woodpecker": {
+    "description": "The red crest tilts slightly without moving the gripping feet; the bird blinks.",
+    "frames": 3,
+    "duration": 5.5
+  },
+  "woodland-box-turtle": {
+    "description": "A front foot shifts under the domed shell before a slow blink.",
+    "frames": 3,
+    "duration": 6.5
+  },
+  "central-ratsnake": {
+    "description": "A small tongue retraction and fork flick; the snake keeps its lidless eye open.",
+    "frames": 3,
+    "duration": 5
+  },
+  "five-lined-skink": {
+    "description": "The blue tail tip gives a small upward twitch, then the lizard blinks.",
+    "frames": 3,
+    "duration": 5.3
+  },
+  "painted-turtle": {
+    "description": "One tucked foot shifts a pixel while the striped shell remains still, followed by a blink.",
+    "frames": 3,
+    "duration": 6.1
+  },
+  "american-bullfrog": {
+    "description": "The pale throat gently expands, then both eyes briefly close.",
+    "frames": 3,
+    "duration": 3.6
+  },
+  "spotted-salamander": {
+    "description": "The tapered tail sweeps a pixel to either side while a rear foot shifts.",
+    "frames": 3,
+    "duration": 1.8
+  },
+  "red-spotted-newt": {
+    "description": "The orange eft flexes its tail and lightly repositions a rear foot.",
+    "frames": 3,
+    "duration": 2.1
+  },
+  "spring-peeper": {
+    "description": "A tiny foot taps, followed by a quick, paired eye blink.",
+    "frames": 3,
+    "duration": 3.2
+  },
+  "brook-trout": {
+    "description": "The orange tail fans up and down as the dorsal fin changes angle.",
+    "frames": 3,
+    "duration": 1.4
+  },
+  "largemouth-bass": {
+    "description": "The tail beats in a slow rhythm while the top fin subtly flexes.",
+    "frames": 3,
+    "duration": 1.8
+  },
+  "bluegill": {
+    "description": "The forked tail paddles while the lower fin gives a small counterstroke.",
+    "frames": 3,
+    "duration": 1.5
+  },
+  "channel-catfish": {
+    "description": "The tail sweeps gently; the longest whiskers twitch independently.",
+    "frames": 3,
+    "duration": 2
+  },
+  "monarch": {
+    "description": "Both wings fold toward the body and open in a measured flutter.",
+    "frames": 3,
+    "duration": 1.7
+  },
+  "tiger-swallowtail": {
+    "description": "The striped wings and hindwing tails draw inward, then spread again.",
+    "frames": 3,
+    "duration": 1.5
+  },
+  "green-darner": {
+    "description": "Four wings flick inward around a stable green thorax and segmented abdomen.",
+    "frames": 3,
+    "duration": 1.2
+  },
+  "horseshoe-crab": {
+    "description": "The long tail shifts side to side with a small twitch of the rear edges.",
+    "frames": 3,
+    "duration": 2.4
+  }
+}

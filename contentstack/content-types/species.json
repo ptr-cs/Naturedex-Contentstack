@@ -1,0 +1,262 @@
+{
+  "content_type": {
+    "uid": "species",
+    "title": "Species",
+    "description": "Naturedex species content. Application validation also checks local assets and cross-entry relationships.",
+    "schema": [
+      {
+        "uid": "title",
+        "display_name": "Common name",
+        "data_type": "text",
+        "mandatory": true,
+        "multiple": false,
+        "unique": false,
+        "field_metadata": {
+          "multiline": false,
+          "_default": true
+        }
+      },
+      {
+        "uid": "stable_id",
+        "display_name": "Stable application ID",
+        "data_type": "text",
+        "mandatory": true,
+        "multiple": false,
+        "unique": true,
+        "field_metadata": {
+          "multiline": false
+        },
+        "format": "^[a-z0-9]+(?:[-_][a-z0-9]+)*$"
+      },
+      {
+        "uid": "dex_number",
+        "display_name": "Field guide number",
+        "data_type": "number",
+        "mandatory": true,
+        "multiple": false,
+        "unique": true,
+        "field_metadata": {}
+      },
+      {
+        "uid": "scientific_name",
+        "display_name": "Scientific name",
+        "data_type": "text",
+        "mandatory": true,
+        "multiple": false,
+        "unique": false,
+        "field_metadata": {
+          "multiline": false
+        }
+      },
+      {
+        "uid": "group",
+        "display_name": "Animal group",
+        "data_type": "text",
+        "mandatory": true,
+        "multiple": false,
+        "unique": false,
+        "field_metadata": {
+          "multiline": false
+        },
+        "display_type": "dropdown",
+        "enum": {
+          "advanced": false,
+          "choices": [
+            {
+              "value": "Mammals"
+            },
+            {
+              "value": "Birds"
+            },
+            {
+              "value": "Reptiles"
+            },
+            {
+              "value": "Amphibians"
+            },
+            {
+              "value": "Fish"
+            },
+            {
+              "value": "Invertebrates"
+            }
+          ]
+        }
+      },
+      {
+        "uid": "sprite",
+        "display_name": "Local sprite path",
+        "data_type": "text",
+        "mandatory": true,
+        "multiple": false,
+        "unique": false,
+        "field_metadata": {
+          "multiline": false
+        },
+        "format": "^/sprites/[a-z0-9-]+\\.svg$"
+      },
+      {
+        "uid": "description",
+        "display_name": "Description",
+        "data_type": "text",
+        "mandatory": true,
+        "multiple": false,
+        "unique": false,
+        "field_metadata": {
+          "multiline": true
+        }
+      },
+      {
+        "uid": "habitats",
+        "display_name": "Habitats",
+        "data_type": "text",
+        "mandatory": true,
+        "multiple": true,
+        "unique": false,
+        "field_metadata": {
+          "multiline": false
+        }
+      },
+      {
+        "uid": "diet",
+        "display_name": "Diet",
+        "data_type": "text",
+        "mandatory": true,
+        "multiple": true,
+        "unique": false,
+        "field_metadata": {
+          "multiline": false
+        }
+      },
+      {
+        "uid": "activity",
+        "display_name": "Activity",
+        "data_type": "text",
+        "mandatory": true,
+        "multiple": false,
+        "unique": false,
+        "field_metadata": {
+          "multiline": false
+        }
+      },
+      {
+        "uid": "size",
+        "display_name": "Sourced measurements",
+        "data_type": "group",
+        "mandatory": true,
+        "multiple": false,
+        "unique": false,
+        "field_metadata": {
+          "description": "Leave both endpoints empty when a range is unavailable. Include units and source qualifications in the note."
+        },
+        "schema": [
+          {
+            "uid": "length_min_cm",
+            "display_name": "Minimum length (cm)",
+            "data_type": "number",
+            "mandatory": false,
+            "multiple": false,
+            "unique": false,
+            "field_metadata": {}
+          },
+          {
+            "uid": "length_max_cm",
+            "display_name": "Maximum length (cm)",
+            "data_type": "number",
+            "mandatory": false,
+            "multiple": false,
+            "unique": false,
+            "field_metadata": {}
+          },
+          {
+            "uid": "weight_min_kg",
+            "display_name": "Minimum weight (kg)",
+            "data_type": "number",
+            "mandatory": false,
+            "multiple": false,
+            "unique": false,
+            "field_metadata": {}
+          },
+          {
+            "uid": "weight_max_kg",
+            "display_name": "Maximum weight (kg)",
+            "data_type": "number",
+            "mandatory": false,
+            "multiple": false,
+            "unique": false,
+            "field_metadata": {}
+          },
+          {
+            "uid": "note",
+            "display_name": "Measurement qualification",
+            "data_type": "text",
+            "mandatory": false,
+            "multiple": false,
+            "unique": false,
+            "field_metadata": {
+              "multiline": true
+            }
+          }
+        ]
+      },
+      {
+        "uid": "habitat_regions",
+        "display_name": "Illustrative habitat regions",
+        "data_type": "text",
+        "mandatory": true,
+        "multiple": true,
+        "unique": false,
+        "field_metadata": {
+          "multiline": false
+        },
+        "display_type": "dropdown",
+        "enum": {
+          "advanced": false,
+          "choices": [
+            {
+              "value": "mountains"
+            },
+            {
+              "value": "valley"
+            },
+            {
+              "value": "piedmont"
+            },
+            {
+              "value": "coastal"
+            }
+          ]
+        }
+      },
+      {
+        "uid": "region_note",
+        "display_name": "Region association qualification",
+        "data_type": "text",
+        "mandatory": true,
+        "multiple": false,
+        "unique": false,
+        "field_metadata": {
+          "multiline": true
+        }
+      },
+      {
+        "uid": "source_urls",
+        "display_name": "Primary source URLs",
+        "data_type": "text",
+        "mandatory": true,
+        "multiple": true,
+        "unique": false,
+        "field_metadata": {
+          "multiline": false
+        },
+        "format": "^https://"
+      }
+    ],
+    "options": {
+      "is_page": false,
+      "singleton": false,
+      "title": "title",
+      "sub_title": []
+    }
+  }
+}

@@ -1,0 +1,53 @@
+name: Deploy
+
+# Publishing in Contentstack calls the relay in infra/publish.yaml, which
+# starts this workflow. Pushes to main and manual runs deploy the same way.
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+  id-token: write
+
+# One deploy at a time. While one runs, newer triggers collapse into a single
+# pending run, so a burst of publishes produces at most one extra build.
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Pull content and deploy
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    # Secrets live in this environment, which only main may use. The AWS role
+    # trusts only jobs in this environment.
+    environment: production
+    env:
+      CONTENTSTACK_API_KEY: ${{ secrets.CONTENTSTACK_API_KEY }}
+      CONTENTSTACK_DELIVERY_TOKEN: ${{ secrets.CONTENTSTACK_DELIVERY_TOKEN }}
+      CONTENTSTACK_ENVIRONMENT: ${{ vars.CONTENTSTACK_ENVIRONMENT }}
+      CONTENTSTACK_REGION: ${{ vars.CONTENTSTACK_REGION }}
+      CONTENTSTACK_LOCALE: ${{ vars.CONTENTSTACK_LOCALE }}
+      CONTENTSTACK_BRANCH: ${{ vars.CONTENTSTACK_BRANCH }}
+      NATUREDEX_STACK: ${{ vars.NATUREDEX_STACK || 'naturedex-contentstack' }}
+      NATUREDEX_REGION: ${{ vars.AWS_REGION || 'us-east-1' }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      # Fails (and deploys nothing) on missing credentials or invalid content.
+      - run: npm run cms:pull
+      - uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd # v6.3.0
+        with:
+          role-to-assume: ${{ vars.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: ${{ vars.AWS_REGION || 'us-east-1' }}
+      # Runs unit tests, builds (with /status), scans, uploads, and invalidates.
+      - run: npm run deploy:aws -- content

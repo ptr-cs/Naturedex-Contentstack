@@ -1,0 +1,124 @@
+{
+  "content_type": {
+    "uid": "blog_post",
+    "title": "Field note",
+    "description": "Naturedex field note content. Application validation also checks local assets and cross-entry relationships.",
+    "schema": [
+      {
+        "uid": "title",
+        "display_name": "Title",
+        "data_type": "text",
+        "mandatory": true,
+        "multiple": false,
+        "unique": false,
+        "field_metadata": {
+          "multiline": false,
+          "_default": true
+        }
+      },
+      {
+        "uid": "stable_id",
+        "display_name": "Stable application ID",
+        "data_type": "text",
+        "mandatory": true,
+        "multiple": false,
+        "unique": true,
+        "field_metadata": {
+          "multiline": false
+        },
+        "format": "^[a-z0-9]+(?:[-_][a-z0-9]+)*$"
+      },
+      {
+        "uid": "slug",
+        "display_name": "Article slug",
+        "data_type": "text",
+        "mandatory": true,
+        "multiple": false,
+        "unique": true,
+        "field_metadata": {
+          "multiline": false
+        },
+        "format": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+      },
+      {
+        "uid": "excerpt",
+        "display_name": "Excerpt",
+        "data_type": "text",
+        "mandatory": false,
+        "multiple": false,
+        "unique": false,
+        "field_metadata": {
+          "multiline": true
+        }
+      },
+      {
+        "uid": "body",
+        "display_name": "Article (Markdown)",
+        "data_type": "text",
+        "mandatory": true,
+        "multiple": false,
+        "unique": false,
+        "field_metadata": {
+          "description": "Plain Markdown; the frontend supports paragraphs and level-two headings.",
+          "markdown": true
+        }
+      },
+      {
+        "uid": "category",
+        "display_name": "Category",
+        "data_type": "text",
+        "mandatory": true,
+        "multiple": false,
+        "unique": false,
+        "field_metadata": {
+          "multiline": false
+        }
+      },
+      {
+        "uid": "related_species",
+        "display_name": "Related species",
+        "data_type": "reference",
+        "reference_to": [
+          "species"
+        ],
+        "multiple": true,
+        "mandatory": false,
+        "unique": false,
+        "field_metadata": {
+          "ref_multiple": true,
+          "ref_multiple_content_types": true
+        }
+      },
+      {
+        "uid": "author",
+        "display_name": "Author label",
+        "data_type": "text",
+        "mandatory": false,
+        "multiple": false,
+        "unique": false,
+        "field_metadata": {
+          "multiline": false
+        }
+      },
+      {
+        "uid": "published_at",
+        "display_name": "Original publication date",
+        "data_type": "isodate",
+        "mandatory": false,
+        "multiple": false,
+        "unique": false,
+        "field_metadata": {
+          "description": "Use the historical publication date when importing an existing field note. Created/updated dates use native Contentstack metadata."
+        },
+        "startDate": null,
+        "endDate": null
+      }
+    ],
+    "options": {
+      "is_page": false,
+      "singleton": false,
+      "title": "title",
+      "sub_title": []
+    }
+  }
+}

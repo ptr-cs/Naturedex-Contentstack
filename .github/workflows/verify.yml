@@ -1,0 +1,44 @@
+name: Prepare and verify Naturedex
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: verify-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: npm run verify
+      - name: Check the static artifact
+        run: node scripts/scan-release.mjs
+      - name: Retain verification reports
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: naturedex-verification
+          path: |
+            coverage/
+            playwright-report/
+            test-results/
+          if-no-files-found: ignore
+          retention-days: 7
+# Deliberately no AWS credentials, OIDC deployment permissions, CMS tokens,
+# Contentstack imports/pulls, S3 uploads, or CloudFront invalidations in CI.

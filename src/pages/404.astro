@@ -1,0 +1,9 @@
+---
+import Naturedex from '../components/Naturedex';
+import Page from '../layouts/Page.astro';
+import { readContentSnapshot } from '../lib/content';
+const snapshot = readContentSnapshot();
+---
+<Page title="Trail not found" noindex>
+  <Naturedex client:load species={snapshot.species} posts={snapshot.posts} initialPath="/404" cmsUrl="https://app.contentstack.com/" />
+</Page>
