@@ -108,7 +108,9 @@ The release guard rejects a seed snapshot and requires a public HTTPS site URL. 
 | `contentstack/` | Native CMS model definitions |
 | `scripts/contentstack/` | Explicit import and published-content sync tools |
 | `data/content.json` | Current public build snapshot |
-| `public/` | Local art, map, and licensed font |
+| `public/` | Map, licensed font and the two decorative layout sprites |
+| `art/sprites/` | Source pixel art and its animations (uploaded to the Contentstack asset library; not deployed) |
+| `scripts/contentstack/migrate-sprites.ts` | One-time move of sprites into the asset library |
 | `infra/aws.yaml` | Site hosting: S3 + CloudFront |
 | `infra/publish.yaml` | Webhook relay and GitHub deploy role (generated from `infra/publish-relay.js`) |
 | `scripts/deploy-aws.sh` | Test, build, scan, upload and invalidate |

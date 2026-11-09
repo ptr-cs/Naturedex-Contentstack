@@ -26,7 +26,15 @@ Two Contentstack behaviours to know about: the field name `region_ids` is reserv
 
 ## Content model
 
-The native schema JSON files are under contentstack/content-types. Species entries contain common/scientific names, group, number, text descriptions, multiple habitat/diet values, activity, measurement endpoints and qualifications, illustrative region associations, primary source URLs, and a supported local sprite path.
+The native schema JSON files are under contentstack/content-types. Species entries contain common/scientific names, group, number, text descriptions, multiple habitat/diet values, activity, measurement endpoints and qualifications, illustrative region associations, primary source URLs, and two asset fields: **Sprite** (required) and **Animated sprite** (optional).
+
+### Sprites live in the asset library
+
+Each species' pixel art is an SVG in the asset library's **Naturedex sprites** folder. The site shows images straight from Contentstack's image CDN (`eu-images.contentstack.com` for this stack). While motion is on it shows the animated version; visitors who prefer reduced motion see the still one.
+
+To add a species with new art: upload the SVG (or two, still and animated) to **Naturedex sprites**, pick them in the entry's Sprite fields, then publish the assets and the entry. No code change is needed. A pull rejects a sprite that isn't an SVG, is over 512 KB, or isn't served from a Contentstack image host.
+
+The original art and its generator stay in the repository (`art/sprites/`, `npm run sprites:build`). `npm run cms:migrate-sprites` moved them into the library: a read-only plan by default, `-- --apply` to upload, link and publish, and `-- --finalize` to remove the old text field. It's safe to rerun.
 
 Field notes contain a stable ID, slug, title, excerpt, Markdown body, category, author label, original publication date and native references to species entries. Application creation/update timestamps come from Contentstack's native metadata. The importer does not attempt to overwrite those system fields with historical timestamps.
 
@@ -51,7 +59,7 @@ An optional publish webhook runs the same pull, validation, tests and build auto
 
 ## Validation and tests
 
-Snapshot validation rejects drafts, unknown fields, unsafe IDs/slugs, duplicate article/species IDs, duplicate numbers/slugs, unavailable species references, unsupported sprite paths or map regions, non-HTTPS source links, malformed timestamps and negative, incomplete or reversed measurement ranges. Unknown sourced measurements remain null.
+Snapshot validation rejects drafts, unknown fields, unsafe IDs/slugs, duplicate article/species IDs, duplicate numbers/slugs, unavailable species references, sprites that aren't Contentstack-hosted SVGs, unknown map regions, non-HTTPS source links, malformed timestamps and negative, incomplete or reversed measurement ranges. Unknown sourced measurements remain null.
 
 Client tests use controlled HTTP doubles; they cover regional configuration, secret handling, pagination completeness, reference resolution, validation failure, atomic replacement, and the management importer's create-only behavior. They do not claim a completed live account import.
 
