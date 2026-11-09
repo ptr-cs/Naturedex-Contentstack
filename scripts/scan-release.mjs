@@ -1,7 +1,21 @@
 import { existsSync, lstatSync, readFileSync, readdirSync } from 'node:fs';
 import { join, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { readContentSnapshot } from '../src/lib/content.ts';
+import { contentstackImageHosts, readContentSnapshot } from '../src/lib/content.ts';
+
+const escapeRegExp = (value) => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+/**
+ * Contentstack puts the stack API key in every asset-library URL
+ * (https://eu-images.contentstack.com/v3/assets/<api key>/...). The key only
+ * identifies the stack; reading content needs the delivery token. So the API
+ * key may appear there and nowhere else. Tokens are never allowed.
+ */
+function withoutAssetUrls(contents, apiKey) {
+  const hosts = contentstackImageHosts.map(escapeRegExp).join('|');
+  const key = escapeRegExp(apiKey);
+  return contents.replace(new RegExp(`https?:(?:\\\\?/){2}(?:${hosts})(?:\\\\?/)v3(?:\\\\?/)assets(?:\\\\?/)${key}(?=\\\\?/)`, 'g'), '');
+}
 
 function artifactFiles(directory) {
   const output = [];
@@ -29,15 +43,16 @@ export function scanRelease({ directory = resolve('dist'), environment = process
   }
   const credentials = Object.entries(environment)
     .filter(([key, value]) => /^CONTENTSTACK_.*(?:TOKEN|API_KEY|SECRET|PASSWORD|AUTHTOKEN)$/i.test(key) && typeof value === 'string' && value.length >= 8)
-    .map(([key, value]) => ({ key, needles: [...new Set([value, encodeURIComponent(value), JSON.stringify(value).slice(1, -1)])].map((needle) => Buffer.from(needle)) }));
+    .map(([key, value]) => ({ key, value, needles: [...new Set([value, encodeURIComponent(value), JSON.stringify(value).slice(1, -1)])].map((needle) => Buffer.from(needle)) }));
   const files = artifactFiles(directory);
   for (const file of files) {
     const path = relative(directory, file).replaceAll('\\', '/');
     if (/(?:^|\/)(?:\.env(?:\.[^/]*)?|\.git|\.aws|node_modules|server|cms)(?:\/|$)|\.(?:php[0-9]?|phtml|pem|key|sqlite(?:-[^/]*)?|db)$|(?:^|\/)(?:wrangler\.json|\.admin-password|\.local-token)$/.test(path)) {
       throw new Error(`A private or server-only file entered the static release: ${path}`);
     }
-    const contents = readFileSync(file);
-    for (const { key, needles } of credentials) {
+    const raw = readFileSync(file);
+    for (const { key, value, needles } of credentials) {
+      const contents = /API_KEY$/i.test(key) ? Buffer.from(withoutAssetUrls(raw.toString('latin1'), value), 'latin1') : raw;
       if (needles.some((needle) => contents.includes(needle))) throw new Error(`Configured credential ${key} was found in ${path}. The value was not printed.`);
     }
   }

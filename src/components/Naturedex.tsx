@@ -197,6 +197,8 @@ function SpeciesDetail({
         <div className="detail-sprite">
           <Sprite
             src={entry.sprite}
+            animatedSrc={entry.spriteAnimated}
+            spriteId={entry.id}
             alt={`Pixel illustration of ${entry.name}`}
             width="200"
             height="200"
@@ -296,6 +298,8 @@ function SpeciesCard({
         <div className="sprite-stage">
           <Sprite
             src={entry.sprite}
+            animatedSrc={entry.spriteAnimated}
+            spriteId={entry.id}
             alt=""
             width="106"
             height="106"
@@ -352,7 +356,7 @@ function JournalCard({
         aria-hidden="true"
       >
         <span className="journal-cover-grid" />
-        <Sprite src={art?.sprite} alt="" width="120" height="120" />
+        {art && <Sprite src={art.sprite} animatedSrc={art.spriteAnimated} spriteId={art.id} alt="" width="120" height="120" />}
         <span className="cover-stamp">
           FIELD
           <br />
@@ -672,7 +676,9 @@ function NaturedexContent({
                   <br />
                   <strong>START WITH A CLOSER LOOK.</strong>
                   <Sprite
-                    src="/sprites/northern-cardinal.svg"
+                    src="/ui/northern-cardinal.svg"
+                    animatedSrc="/ui/northern-cardinal-animated.svg"
+                    spriteId="northern-cardinal"
                     alt=""
                     width="60"
                     height="60"
@@ -932,7 +938,9 @@ function NaturedexContent({
           {isAbout && (
             <div className="about-content panel">
               <Sprite
-                src="/sprites/white-tailed-deer.svg"
+                src="/ui/white-tailed-deer.svg"
+                animatedSrc="/ui/white-tailed-deer-animated.svg"
+                spriteId="white-tailed-deer"
                 alt="Original pixel illustration of a white-tailed deer"
                 width="150"
                 height="150"

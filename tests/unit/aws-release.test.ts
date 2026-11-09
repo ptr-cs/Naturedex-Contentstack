@@ -1,4 +1,5 @@
 import { afterEach, describe, expect, it } from 'vitest';
+import { contentstackImageHosts } from '../../src/lib/content';
 import { mkdtempSync, mkdirSync, readFileSync, rmSync, symlinkSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
@@ -53,6 +54,9 @@ describe('the offline AWS static-hosting contract', () => {
     const headers = resources.SecurityHeaders.Properties.ResponseHeadersPolicyConfig.SecurityHeadersConfig;
     expect(headers.ContentSecurityPolicy.Override).toBe(true);
     expect(headers.ContentSecurityPolicy.ContentSecurityPolicy).toContain("connect-src 'self'");
+    // Sprites load from the Contentstack image CDN: exactly the hosts the snapshot schema accepts.
+    const imgSrc = /img-src ([^;]+)/.exec(headers.ContentSecurityPolicy.ContentSecurityPolicy)![1].split(' ');
+    expect(imgSrc).toEqual(["'self'", 'data:', ...contentstackImageHosts.map((host) => `https://${host}`)]);
     expect(headers.ContentTypeOptions.Override).toBe(true);
   });
 
@@ -127,6 +131,21 @@ describe('credential-aware static artifact checks', () => {
     expect(failure).toBeInstanceOf(Error);
     expect((failure as Error).message).toContain('CONTENTSTACK_DELIVERY_TOKEN');
     expect((failure as Error).message).not.toContain(token);
+  });
+
+  it('allows the stack API key only inside Contentstack asset-library URLs', () => {
+    const key = 'bltd0290474test2879';
+    const token = 'cs-delivery-0123456789abcdef';
+    const environment = { CONTENTSTACK_API_KEY: key, CONTENTSTACK_DELIVERY_TOKEN: token };
+    const scan = (body: string) => { const directory = artifact(); writeFileSync(join(directory, 'page.html'), body); return () => scanRelease({ directory, expectedPaths: ['index.html'], environment }); };
+    // As Astro serializes it in HTML attributes, and as escaped JSON.
+    expect(scan(`<img src="https://eu-images.contentstack.com/v3/assets/${key}/blt1/abc/monarch.svg">`)).not.toThrow();
+    expect(scan(`{"sprite":"https:\\/\\/images.contentstack.io\\/v3\\/assets\\/${key}\\/blt1\\/abc\\/fox.svg"}`)).not.toThrow();
+    // Anywhere else, the key is still flagged, as are tokens even inside asset URLs.
+    expect(scan(`<script>const apiKey = "${key}";</script>`)).toThrow('CONTENTSTACK_API_KEY');
+    expect(scan(`<img src="https://evil.example/v3/assets/${key}/x.svg">`)).toThrow('CONTENTSTACK_API_KEY');
+    expect(scan(`<img src="https://eu-images.contentstack.com/v3/assets/${key}/x.svg"> ${key}`)).toThrow('CONTENTSTACK_API_KEY');
+    expect(scan(`<img src="https://eu-images.contentstack.com/v3/assets/${token}/x.svg">`)).toThrow('CONTENTSTACK_DELIVERY_TOKEN');
   });
 
   it.each(['.env', 'settings.php', 'authoring.sqlite', 'cms/private.txt', 'server/entry.mjs'])('rejects private/runtime artifact %s', (file) => {

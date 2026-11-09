@@ -110,7 +110,8 @@ export async function motionState(driver, enabled) {
   await wait(driver, () => driver.executeScript(value => {
     const images = [...document.querySelectorAll('img[data-sprite]')];
     return images.length > 0 && images.every(image => image.dataset.animated === String(value)
-      && image.getAttribute('src') === `/sprites/${value ? 'animated/' : ''}${image.dataset.sprite}.svg`);
+      && image.getAttribute('src').endsWith(value ? '-animated.svg' : '.svg')
+      && (value || !image.getAttribute('src').endsWith('-animated.svg')));
   }, enabled), `All animal images should use ${enabled ? 'animated' : 'static'} assets`);
 }
 export async function media(driver, reduced) {

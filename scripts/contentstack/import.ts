@@ -3,6 +3,7 @@ import { resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { readContentSnapshot, validateContentSnapshot, type ContentSnapshot } from '../../src/lib/content.ts';
 import { contentstackRequest, getManagementConfig, regionEndpoints, type CmsEntry, type ManagementConfig } from '../../src/lib/contentstack.ts';
+import { ensureSpriteAssets, managementHeaders, type SpriteAssets } from './assets.ts';
 
 type Model = { content_type: { uid: string; schema: CmsEntry[]; [key: string]: unknown } };
 type Collection = 'content_types' | 'entries';
@@ -31,18 +32,16 @@ async function list(config: ManagementConfig, path: string, collection: Collecti
   throw new Error('Management collection exceeded the project entry limit.');
 }
 
-function managementHeaders(config: ManagementConfig): Record<string, string> {
-  return { api_key: config.apiKey, authorization: config.managementToken, 'Content-Type': 'application/json', ...(config.branch ? { branch: config.branch } : {}) };
-}
-
 export function readModels(): Model[] {
   return ['species', 'blog_post'].map((uid) => JSON.parse(readFileSync(new URL(`../../contentstack/content-types/${uid}.json`, import.meta.url), 'utf8')) as Model);
 }
 
-export function speciesEntry(species: ContentSnapshot['species'][number]): CmsEntry {
+/** `sprite` holds asset UIDs: file fields are set by UID, not URL. */
+export function speciesEntry(species: ContentSnapshot['species'][number], sprite: SpriteAssets): CmsEntry {
   return {
     stable_id: species.id, dex_number: species.dexNumber, title: species.name,
-    scientific_name: species.scientificName, group: species.group, sprite: species.sprite,
+    scientific_name: species.scientificName, group: species.group,
+    sprite_image: sprite.still, ...(sprite.animated ? { sprite_animation: sprite.animated } : {}),
     description: species.description, habitats: species.habitats, diet: species.diet, activity: species.activity,
     size: {
       ...(species.size.lengthCm ? { length_min_cm: species.size.lengthCm[0], length_max_cm: species.size.lengthCm[1] } : {}),
@@ -112,16 +111,17 @@ export async function importMissingContent(snapshotInput: ContentSnapshot, confi
     return response.entry as CmsEntry;
   }
   let createdSpecies = 0; let createdPosts = 0;
-  for (const species of snapshot.species) {
-    if (speciesById.has(species.id)) continue;
-    const created = await create('species', speciesEntry(species));
+  const missingSpecies = snapshot.species.filter((species) => !speciesById.has(species.id));
+  const sprites = missingSpecies.length ? await ensureSpriteAssets(config, missingSpecies, fetchImpl) : { assets: new Map<string, SpriteAssets>(), uploaded: 0 };
+  for (const species of missingSpecies) {
+    const created = await create('species', speciesEntry(species, sprites.assets.get(species.id)!));
     uidById.set(species.id, created.uid as string); createdSpecies++;
   }
   for (const post of snapshot.posts) {
     if (postsById.has(post.id)) continue;
     await create('blog_post', postEntry(post, uidById)); createdPosts++;
   }
-  return { mode: 'applied', createdModels, createdSpecies, createdPosts, skippedSpecies: snapshot.species.length - createdSpecies, skippedPosts: snapshot.posts.length - createdPosts, published: 0 };
+  return { mode: 'applied', createdModels, uploadedSprites: sprites.uploaded, createdSpecies, createdPosts, skippedSpecies: snapshot.species.length - createdSpecies, skippedPosts: snapshot.posts.length - createdPosts, published: 0 };
 }
 
 export async function main(): Promise<void> {
@@ -129,7 +129,7 @@ export async function main(): Promise<void> {
   if (args.some((argument) => argument !== '--apply')) throw new Error('Usage: npm run cms:import [-- --apply]');
   const snapshot = readContentSnapshot();
   if (!args.includes('--apply')) {
-    console.log(JSON.stringify({ mode: 'dry-run', source: 'data/content.json', proposedModels: readModels().map((model) => model.content_type.uid), proposedSpecies: snapshot.species.length, proposedPosts: snapshot.posts.length, remoteStateChecked: false, remoteRequests: 0, note: 'Offline proposal only. --apply creates missing content; existing content stays unchanged and nothing is published.' }));
+    console.log(JSON.stringify({ mode: 'dry-run', source: 'data/content.json', proposedModels: readModels().map((model) => model.content_type.uid), proposedSpecies: snapshot.species.length, proposedSpriteFiles: 'art/sprites/', proposedPosts: snapshot.posts.length, remoteStateChecked: false, remoteRequests: 0, note: 'Offline proposal only. --apply creates missing content; existing content stays unchanged and nothing is published.' }));
     return;
   }
   console.log(JSON.stringify(await importMissingContent(snapshot, getManagementConfig())));

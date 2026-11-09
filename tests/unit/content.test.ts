@@ -11,6 +11,7 @@ const species = JSON.parse(
   scientificName: string;
   group: string;
   sprite: string;
+  spriteAnimated: string | null;
   regionIds: string[];
   regionNote: string;
   sourceURLs: string[];
@@ -48,13 +49,12 @@ describe('the Virginia field-guide content contract', () => {
     }
   });
 
-  it('ships its sprites locally and distinguishes regional guidance from observations', () => {
+  it('serves sprites from the asset library, keeps their source art, and distinguishes regional guidance from observations', () => {
     const regions = new Set(['mountains', 'valley', 'piedmont', 'coastal']);
     for (const entry of species) {
-      expect(entry.sprite).toMatch(/^\/sprites\/[a-z0-9-]+\.svg$/);
-      expect(existsSync(resolve(process.cwd(), `public${entry.sprite}`))).toBe(
-        true,
-      );
+      expect(new URL(entry.sprite).pathname).toMatch(/^\/v3\/assets\/.+\.svg$/);
+      expect(entry.spriteAnimated === null || new URL(entry.spriteAnimated).pathname.endsWith('-animated.svg')).toBe(true);
+      expect(existsSync(resolve(process.cwd(), `art/sprites/${entry.id}.svg`))).toBe(true);
       expect(entry.regionIds.length).toBeGreaterThan(0);
       for (const region of entry.regionIds)
         expect(regions.has(region)).toBe(true);

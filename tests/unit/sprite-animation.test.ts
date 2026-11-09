@@ -4,7 +4,7 @@ import { createHash } from 'node:crypto';
 import { resolve } from 'node:path';
 
 const species = JSON.parse(readFileSync(new URL('../../data/content.json', import.meta.url), 'utf8')).species as Array<{
-  id: string; name: string; sprite: string;
+  id: string; name: string;
 }>;
 
 function attribute(markup: string, name: string) {
@@ -38,10 +38,10 @@ function pixels(markup: string, label: string) {
 
 describe('the original animal sprites and their animated counterparts', () => {
   it('provides exactly one three-frame animation for every animal', () => {
-    const files = readdirSync(resolve(process.cwd(), 'public/sprites/animated')).filter(file => file.endsWith('.svg'));
+    const files = readdirSync(resolve(process.cwd(), 'art/sprites/animated')).filter(file => file.endsWith('.svg'));
     expect(files.sort()).toEqual(species.map(entry => `${entry.id}.svg`).sort());
     for (const entry of species) {
-      const svg = readFileSync(resolve(process.cwd(), `public/sprites/animated/${entry.id}.svg`), 'utf8');
+      const svg = readFileSync(resolve(process.cwd(), `art/sprites/animated/${entry.id}.svg`), 'utf8');
       const root = /<svg\b[^>]*>/.exec(svg)?.[0] || '';
       expect(attribute(root, 'data-sprite-frames'), entry.id).toBe('3');
       expect(attribute(root, 'data-species'), entry.id).toBe(entry.id);
@@ -54,8 +54,8 @@ describe('the original animal sprites and their animated counterparts', () => {
 
   it('preserves the exact original pixels as frame zero and supplies distinct additional poses', () => {
     for (const entry of species) {
-      const original = readFileSync(resolve(process.cwd(), `public${entry.sprite}`), 'utf8');
-      const animated = readFileSync(resolve(process.cwd(), `public/sprites/animated/${entry.id}.svg`), 'utf8');
+      const original = readFileSync(resolve(process.cwd(), `art/sprites/${entry.id}.svg`), 'utf8');
+      const animated = readFileSync(resolve(process.cwd(), `art/sprites/animated/${entry.id}.svg`), 'utf8');
       const frames = [...animated.matchAll(/<g\b[^>]*data-frame=["'](\d+)["'][^>]*>([\s\S]*?)<\/g>/g)];
       const digests = frames.map(frame => pixels(frame[2], `${entry.id} frame ${frame[1]}`));
       expect(digests[0], `${entry.id}: original illustration must remain intact`).toBe(pixels(original, `${entry.id} original`));
@@ -65,7 +65,7 @@ describe('the original animal sprites and their animated counterparts', () => {
 
   it('uses discrete frame animation and ships a reduced-motion fallback in each asset', () => {
     for (const entry of species) {
-      const svg = readFileSync(resolve(process.cwd(), `public/sprites/animated/${entry.id}.svg`), 'utf8');
+      const svg = readFileSync(resolve(process.cwd(), `art/sprites/animated/${entry.id}.svg`), 'utf8');
       expect(svg, entry.id).toMatch(/@keyframes\s+[\w-]+/);
       expect(svg, entry.id).toMatch(/steps\(\s*1\s*(?:,\s*(?:start|end))?\)|step-(?:start|end)/);
       expect(svg, entry.id).toMatch(/prefers-reduced-motion\s*:\s*reduce/);

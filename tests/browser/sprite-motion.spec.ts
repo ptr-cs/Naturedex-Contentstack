@@ -1,6 +1,8 @@
 import { expect, test, type Page, type TestInfo } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
 import { readFileSync } from 'node:fs';
+import { pathToFileURL } from 'node:url';
+import { resolve } from 'node:path';
 
 const species = JSON.parse(readFileSync(new URL('../../data/content.json', import.meta.url), 'utf8')).species as Array<{
   id: string; name: string;
@@ -12,8 +14,9 @@ async function expectMotion(page: Page, enabled: boolean) {
   await expect.poll(async () => page.locator('img[data-sprite]').evaluateAll((images, animate) =>
     images.length > 0 && images.every(image =>
       image.getAttribute('data-animated') === String(animate) &&
-      image.getAttribute('src') === `/sprites/${animate ? 'animated/' : ''}${image.getAttribute('data-sprite')}.svg`,
-    ), enabled), { message: `Every animal image should use ${enabled ? 'animated' : 'static'} local artwork` }).toBe(true);
+      (image.getAttribute('src') || '').endsWith(animate ? '-animated.svg' : '.svg') &&
+      (animate || !(image.getAttribute('src') || '').endsWith('-animated.svg')),
+    ), enabled), { message: `Every animal image should use ${enabled ? 'animated' : 'static'} artwork` }).toBe(true);
 }
 
 async function scan(page: Page, testInfo: TestInfo) {
@@ -33,6 +36,10 @@ test('sprites animate by default and a global pause persists across all display 
   await expectMotion(page, true);
   const rendered = await page.locator('img[data-sprite]').evaluateAll(images => images.map(image => image.getAttribute('data-sprite')));
   expect(species.every(entry => rendered.includes(entry.id))).toBe(true);
+  // Species art comes from the Contentstack asset library; only the decorative pair is local.
+  const sources = await page.locator('img[data-sprite]').evaluateAll(images => images.map(image => new URL(image.getAttribute('src')!, location.href)));
+  for (const source of sources) expect(source.hostname === 'eu-images.contentstack.com' || source.hostname.endsWith('images.contentstack.io') || source.pathname.startsWith('/ui/'), source.href).toBe(true);
+  expect(sources.filter(source => source.pathname.startsWith('/v3/assets/')).length).toBeGreaterThanOrEqual(species.length);
 
   await pause.click();
   const resume = page.getByRole('button', { name: 'Animate sprites', exact: true });
@@ -98,7 +105,8 @@ test('every sprite actually cycles through its poses and honors its own reduced-
   test.setTimeout(60_000);
   for (const entry of species) {
     await page.emulateMedia({ reducedMotion: 'no-preference' });
-    await page.goto(`/sprites/animated/${entry.id}.svg`);
+    // The source art in the repository, as uploaded to the asset library.
+    await page.goto(pathToFileURL(resolve(`art/sprites/animated/${entry.id}.svg`)).href);
     const cycle = await page.evaluate(() => {
       const frames = [...document.querySelectorAll('g[data-frame]')];
       const animations = document.getAnimations();

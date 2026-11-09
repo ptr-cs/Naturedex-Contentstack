@@ -6,7 +6,10 @@ export interface Species {
   name: string;
   scientificName: string;
   group: AnimalGroup;
+  /** Still sprite, served from the Contentstack asset library. */
   sprite: string;
+  /** Optional three-pose animation of the same sprite. */
+  spriteAnimated: string | null;
   description: string;
   habitats: string[];
   diet: string[];

@@ -84,16 +84,36 @@
         }
       },
       {
-        "uid": "sprite",
-        "display_name": "Local sprite path",
-        "data_type": "text",
+        "uid": "sprite_image",
+        "display_name": "Sprite",
+        "data_type": "file",
         "mandatory": true,
         "multiple": false,
         "unique": false,
+        "extensions": [
+          "svg"
+        ],
         "field_metadata": {
-          "multiline": false
-        },
-        "format": "^/sprites/[a-z0-9-]+\\.svg$"
+          "description": "48×48 pixel-art SVG from the asset library (the \"Naturedex sprites\" folder).",
+          "rich_text_type": "standard",
+          "image": true
+        }
+      },
+      {
+        "uid": "sprite_animation",
+        "display_name": "Animated sprite",
+        "data_type": "file",
+        "mandatory": false,
+        "multiple": false,
+        "unique": false,
+        "extensions": [
+          "svg"
+        ],
+        "field_metadata": {
+          "description": "Optional three-pose animated SVG. Shown while motion is on; visitors who prefer reduced motion see the still sprite.",
+          "rich_text_type": "standard",
+          "image": true
+        }
       },
       {
         "uid": "description",

@@ -57,11 +57,27 @@ export function getManagementConfig(env: Environment = process.env): ManagementC
   return { ...baseConfig(env), managementToken: required(env, 'CONTENTSTACK_MANAGEMENT_TOKEN') };
 }
 
+/** Contentstack's own explanation of a failed request (no credentials are echoed in it). */
+async function errorDetail(response: Response): Promise<string> {
+  try {
+    const body = JSON.parse((await response.text()).slice(0, 20000)) as { error_message?: unknown; errors?: unknown };
+    const parts: string[] = [];
+    if (typeof body.error_message === 'string') parts.push(body.error_message);
+    if (body.errors && typeof body.errors === 'object') {
+      for (const [field, messages] of Object.entries(body.errors as Record<string, unknown>).slice(0, 5)) {
+        parts.push(`${field}: ${Array.isArray(messages) ? messages.join(' ') : String(messages)}`);
+      }
+    }
+    const detail = parts.join(' | ').replace(/[\r\n]+/g, ' ').slice(0, 500);
+    return detail ? ` (${detail})` : '';
+  } catch { return ''; }
+}
+
 /** Credentials stay in headers; redirects and arbitrary hosts are forbidden. */
 export async function contentstackRequest(
   url: URL,
   headers: Record<string, string>,
-  options: { fetchImpl?: typeof fetch; method?: 'GET' | 'POST'; body?: unknown; timeoutMs?: number } = {},
+  options: { fetchImpl?: typeof fetch; method?: 'GET' | 'POST' | 'PUT'; body?: unknown; timeoutMs?: number } = {},
 ): Promise<CmsEntry> {
   const allowed = new Set<string>(Object.values(regionEndpoints).flatMap((region) => [region.delivery, region.management]));
   if (!allowed.has(url.origin) || url.username || url.password) throw new Error('Refusing an unofficial Contentstack endpoint.');
@@ -69,11 +85,12 @@ export async function contentstackRequest(
   try {
     response = await (options.fetchImpl || fetch)(url, {
       method: options.method || 'GET', headers: { Accept: 'application/json', ...headers },
-      ...(options.body === undefined ? {} : { body: JSON.stringify(options.body) }),
+      // FormData (asset uploads) sets its own multipart Content-Type.
+      ...(options.body === undefined ? {} : { body: options.body instanceof FormData ? options.body : JSON.stringify(options.body) }),
       redirect: 'error', signal: AbortSignal.timeout(options.timeoutMs ?? 15000),
     });
   } catch { throw new Error('Contentstack request failed or timed out. The existing snapshot was retained.'); }
-  if (!response.ok) throw new Error(`Contentstack request returned HTTP ${response.status}. The existing snapshot was retained.`);
+  if (!response.ok) throw new Error(`Contentstack request returned HTTP ${response.status}${await errorDetail(response)}. The existing snapshot was retained.`);
   const body = await response.text();
   if (Buffer.byteLength(body, 'utf8') > 15000000) throw new Error('Contentstack response exceeded the allowed size.');
   let parsed: unknown;
@@ -111,6 +128,22 @@ export async function fetchPublishedEntries(config: ContentstackConfig, type: Co
   throw new Error('Contentstack pagination exceeded the project entry limit.');
 }
 
+const MAX_SPRITE_BYTES = 512 * 1024;
+/** A file field as the Delivery API returns it: an embedded asset object, or nothing. */
+function spriteAsset(value: unknown, label: string, required: boolean): string | null {
+  if (value === undefined || value === null || value === '') {
+    if (required) throw new Error(`${label} is missing. Choose an SVG from the asset library and publish it.`);
+    return null;
+  }
+  if (typeof value !== 'object' || Array.isArray(value)) throw new Error(`${label} is not an asset.`);
+  const asset = value as CmsEntry;
+  if (asset.content_type !== 'image/svg+xml') throw new Error(`${label} must be an SVG image.`);
+  const size = Number(asset.file_size);
+  if (!Number.isFinite(size) || size <= 0 || size > MAX_SPRITE_BYTES) throw new Error(`${label} must be an SVG under 512 KB.`);
+  if (typeof asset.url !== 'string') throw new Error(`${label} has no URL. Publish the asset.`);
+  return asset.url; // The snapshot schema checks the host and path.
+}
+
 function range(group: CmsEntry, min: string, max: string): [unknown, unknown] | null {
   const low = group[min]; const high = group[max];
   if ((low === undefined || low === null) && (high === undefined || high === null)) return null;
@@ -122,7 +155,9 @@ export function normalizeContentstackEntries(speciesEntries: CmsEntry[], postEnt
     const size = entry.size && typeof entry.size === 'object' && !Array.isArray(entry.size) ? entry.size as CmsEntry : {};
     return {
       id: entry.stable_id, dexNumber: entry.dex_number, name: entry.title,
-      scientificName: entry.scientific_name, group: entry.group, sprite: entry.sprite,
+      scientificName: entry.scientific_name, group: entry.group,
+      sprite: spriteAsset(entry.sprite_image, `${String(entry.title)}: Sprite`, true),
+      spriteAnimated: spriteAsset(entry.sprite_animation, `${String(entry.title)}: Animated sprite`, false),
       description: entry.description, habitats: entry.habitats, diet: entry.diet,
       activity: entry.activity,
       size: { lengthCm: range(size, 'length_min_cm', 'length_max_cm'), weightKg: range(size, 'weight_min_kg', 'weight_max_kg'), note: size.note ?? '' },

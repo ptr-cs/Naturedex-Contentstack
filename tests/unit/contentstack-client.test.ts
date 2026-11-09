@@ -18,7 +18,14 @@ const env = {
 };
 const config = getContentstackConfig(env);
 const management = getManagementConfig(env);
-const cmsSpecies: CmsEntry[] = seed.species.map((item, index) => ({ ...speciesEntry(item), uid: 'species_' + index }));
+// The Delivery API embeds file fields as asset objects.
+const deliveredAsset = (url: string) => ({ uid: 'asset_' + url.split('/').pop(), url, filename: url.split('/').pop(), content_type: 'image/svg+xml', file_size: 4096 });
+const cmsSpecies: CmsEntry[] = seed.species.map((item, index) => ({
+  ...speciesEntry(item, { still: 'still_' + index, animated: item.spriteAnimated ? 'animated_' + index : null }),
+  sprite_image: deliveredAsset(item.sprite),
+  ...(item.spriteAnimated ? { sprite_animation: deliveredAsset(item.spriteAnimated) } : {}),
+  uid: 'species_' + index,
+}));
 const uidById = new Map(seed.species.map((item, index) => [item.id, 'species_' + index]));
 const cmsPosts = seed.posts.map((item, index) => ({
   ...postEntry(item, uidById), uid: 'post_' + index,
@@ -166,6 +173,22 @@ describe('native field normalization and references', () => {
     expect(result.posts.some((post) => post.slug === 'test-post-about-deer')).toBe(true);
   });
 
+  it('reads sprites from asset fields and rejects anything but a library SVG', () => {
+    const entry = structuredClone(cmsSpecies[0]);
+    const result = normalizeContentstackEntries([{ ...entry, sprite_animation: undefined }], [], syncedAt);
+    expect(result.species[0].sprite).toBe(seed.species[0].sprite);
+    expect(result.species[0].spriteAnimated).toBeNull();
+    const asset = entry.sprite_image as CmsEntry;
+    const bad = (sprite_image: unknown) => () => normalizeContentstackEntries([{ ...entry, sprite_image }], [], syncedAt);
+    expect(bad(undefined)).toThrow('Sprite is missing');
+    expect(bad('blt123')).toThrow('not an asset');
+    expect(bad({ ...asset, content_type: 'image/png' })).toThrow('SVG');
+    expect(bad({ ...asset, file_size: 600 * 1024 })).toThrow('512 KB');
+    expect(bad({ ...asset, url: 'https://evil.example/v3/assets/a/b/1/x.svg' })).toThrow();
+    expect(bad({ ...asset, url: 'https://eu-images.contentstack.com/v3/assets/a/b/1/x.svg?x=1' })).toThrow();
+    expect(bad({ ...asset, url: 'http://eu-images.contentstack.com/v3/assets/a/b/1/x.svg' })).toThrow();
+  });
+
   it('retains unknown measurement ranges as null and accepts explicitly sourced zero endpoints', () => {
     const entry = structuredClone(cmsSpecies[0]);
     entry.size = { length_min_cm: 0, length_max_cm: 1 };
@@ -238,22 +261,37 @@ describe('atomic snapshots and safe native import', () => {
     expect(result).toMatchObject({ createdModels: 0, createdSpecies: 0, createdPosts: 0, skippedPosts: 4, published: 0 });
   });
 
-  it('creates missing models and entries with native references, never updating or publishing', async () => {
-    let created = 0;
+  it('creates missing models, sprite assets and entries with native references, never updating or publishing', async () => {
+    let created = 0; let uploaded = 0;
     const writes: { path: string; body: CmsEntry }[] = [];
-    const fetchImpl = mockFetch((url, init) => {
+    const uploads: { name: string; type: string; folder: unknown }[] = [];
+    const fetchImpl = mockFetch(async (url, init) => {
       expect(init.headers).toMatchObject({ authorization: env.CONTENTSTACK_MANAGEMENT_TOKEN });
       // A fresh stack: Contentstack omits `count` on empty lists.
-      if (init.method === 'GET') return json(url.pathname === '/v3/content_types' ? { content_types: [] } : { entries: [] });
+      if (init.method === 'GET') return json(url.pathname === '/v3/content_types' ? { content_types: [] } : url.pathname === '/v3/assets' ? { assets: [] } : { entries: [] });
       expect(init.method).toBe('POST');
       expect(url.pathname).not.toContain('publish');
+      if (url.pathname === '/v3/assets') {
+        const form = init.body as FormData;
+        const file = form.get('asset[upload]') as File;
+        expect(init.headers).not.toHaveProperty('Content-Type'); // multipart boundary comes from FormData
+        uploads.push({ name: file.name, type: file.type, folder: form.get('asset[parent_uid]') });
+        return json({ asset: { uid: 'upload_' + (++uploaded) } });
+      }
       const body = JSON.parse(String(init.body)) as CmsEntry;
       writes.push({ path: url.pathname, body });
+      if (url.pathname === '/v3/assets/folders') return json({ asset: { uid: 'sprite_folder' } });
       return url.pathname === '/v3/content_types' ? json(body) : json({ entry: { ...(body.entry as CmsEntry), uid: 'created_' + (++created) } });
     });
     const result = await importMissingContent(seed, management, fetchImpl);
-    expect(result).toMatchObject({ createdModels: 2, createdSpecies: 24, createdPosts: 4, published: 0 });
-    expect(writes).toHaveLength(30);
+    expect(result).toMatchObject({ createdModels: 2, uploadedSprites: 48, createdSpecies: 24, createdPosts: 4, published: 0 });
+    expect(writes).toHaveLength(31); // 2 models + 1 folder + 24 species + 4 posts
+    expect(uploads).toHaveLength(48);
+    expect(uploads.every((upload) => upload.type === 'image/svg+xml' && upload.folder === 'sprite_folder')).toBe(true);
+    expect(uploads.map((upload) => upload.name)).toContain(`${seed.species[0].id}-animated.svg`);
+    const firstSpecies = writes.find((write) => write.path.includes('/species/entries'))!.body.entry as CmsEntry;
+    expect(firstSpecies).toMatchObject({ sprite_image: 'upload_1', sprite_animation: 'upload_2' });
+    expect(firstSpecies).not.toHaveProperty('sprite');
     const postWrite = writes.find((write) => write.path.includes('/blog_post/entries'))!;
     const entry = postWrite.body.entry as CmsEntry;
     expect(entry.related_species).toEqual(seed.posts[0].relatedSpeciesIds.map((id) => ({ uid: 'created_' + (seed.species.findIndex((species) => species.id === id) + 1), _content_type_uid: 'species' })));

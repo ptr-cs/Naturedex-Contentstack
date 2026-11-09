@@ -6,7 +6,6 @@ import {
   type ImgHTMLAttributes,
   type ReactNode,
 } from 'react';
-import manifest from '../lib/sprite-manifest.json';
 import { useHydrated } from '../lib/useHydrated';
 
 const MotionContext = createContext({
@@ -106,16 +105,19 @@ export function SpriteMotionControl() {
 
 export default function Sprite({
   src,
+  animatedSrc,
+  spriteId,
   alt,
   ...props
-}: ImgHTMLAttributes<HTMLImageElement> & { alt: string }) {
+}: ImgHTMLAttributes<HTMLImageElement> & {
+  alt: string;
+  /** Three-pose animation shown while motion is on; without it the still stays. */
+  animatedSrc?: string | null;
+  spriteId: string;
+}) {
   const { enabled } = useContext(MotionContext);
-  const id =
-    typeof src === 'string'
-      ? src.match(/^\/sprites\/([a-z0-9-]+)\.svg$/)?.[1]
-      : undefined;
-  const animated = enabled && !!id && Object.hasOwn(manifest, id);
-  const source = animated ? `/sprites/animated/${id}.svg` : src;
+  const animated = enabled && !!animatedSrc;
+  const source = animated ? animatedSrc : src;
   return (
     // Original pixel SVGs already provide their exact size and animation frames.
     // eslint-disable-next-line @next/next/no-img-element
@@ -123,7 +125,7 @@ export default function Sprite({
       {...props}
       alt={alt}
       src={source}
-      data-sprite={id}
+      data-sprite={spriteId}
       data-animated={animated ? 'true' : 'false'}
     />
   );

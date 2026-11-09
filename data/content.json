@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "source": "contentstack",
-  "syncedAt": "2026-11-08T21:30:50.996Z",
+  "syncedAt": "2026-11-09T02:32:22.044Z",
   "species": [
     {
       "id": "white-tailed-deer",
@@ -9,7 +9,8 @@
       "name": "White-tailed Deer",
       "scientificName": "Odocoileus virginianus",
       "group": "Mammals",
-      "sprite": "/sprites/white-tailed-deer.svg",
+      "sprite": "https://eu-images.contentstack.com/v3/assets/bltd02904741be28791/blte743d42b1bf58a93/6af1302ef20e25969b5eb741/white-tailed-deer.svg",
+      "spriteAnimated": "https://eu-images.contentstack.com/v3/assets/bltd02904741be28791/blt141345c318dd1da7/6af1302e75fe2a0090472ec5/white-tailed-deer-animated.svg",
       "description": "A familiar woodland browser with a bright white underside to its tail. Adults change from warmer summer coats to grayer winter coats.",
       "habitats": [
         "Woodland",
@@ -49,7 +50,8 @@
       "name": "American Black Bear",
       "scientificName": "Ursus americanus",
       "group": "Mammals",
-      "sprite": "/sprites/black-bear.svg",
+      "sprite": "https://eu-images.contentstack.com/v3/assets/bltd02904741be28791/blt8c12d0e0ea9f0941/6af1301c5f936f787c903329/black-bear.svg",
+      "spriteAnimated": "https://eu-images.contentstack.com/v3/assets/bltd02904741be28791/blt38725b4644b1eb97/6af1301d4d0aff57fc671adb/black-bear-animated.svg",
       "description": "Rounded ears, a short tail, and a brown muzzle distinguish this powerful forest mammal. Virginia bears are usually black-coated. Updated description.",
       "habitats": [
         "Woodland",
@@ -92,7 +94,8 @@
       "name": "Red Fox",
       "scientificName": "Vulpes vulpes",
       "group": "Mammals",
-      "sprite": "/sprites/red-fox.svg",
+      "sprite": "https://eu-images.contentstack.com/v3/assets/bltd02904741be28791/blt7ad373b22202c2b0/6af1302d0ba0b5f9a4c0e274/red-fox.svg",
+      "spriteAnimated": "https://eu-images.contentstack.com/v3/assets/bltd02904741be28791/bltf3a9ac326ef5bc34/6af1302d6cd0fe7b575e1ee3/red-fox-animated.svg",
       "description": "A pointed muzzle, upright ears, dark lower legs, and a generous brush of a tail give this adaptable canid its distinctive outline.",
       "habitats": [
         "Forest edge",
@@ -134,8 +137,9 @@
       "name": "North American River Otter",
       "scientificName": "Lontra canadensis",
       "group": "Mammals",
-      "sprite": "/sprites/river-otter.svg",
-      "description": "A streamlined swimmer with short legs, webbed feet, and a strong tapering tail. Its dense brown coat is paler underneath.",
+      "sprite": "https://eu-images.contentstack.com/v3/assets/bltd02904741be28791/blt84215d32126d6c9c/6af1301cf9f3b73113c43f58/river-otter.svg",
+      "spriteAnimated": "https://eu-images.contentstack.com/v3/assets/bltd02904741be28791/bltc47cc53285291339/6af1301c29657212313738f1/river-otter-animated.svg",
+      "description": "A streamlined swimmer with short legs, webbed feet, and a strong tapering tail. Its dense brown coat is paler underneath. Description updated.",
       "habitats": [
         "River",
         "Wetland",
@@ -175,7 +179,8 @@
       "name": "Northern Cardinal",
       "scientificName": "Cardinalis cardinalis",
       "group": "Birds",
-      "sprite": "/sprites/northern-cardinal.svg",
+      "sprite": "https://eu-images.contentstack.com/v3/assets/bltd02904741be28791/blt55e0d428527a2da5/6af1302ce465fd012b084c64/northern-cardinal.svg",
+      "spriteAnimated": "https://eu-images.contentstack.com/v3/assets/bltd02904741be28791/blt532090388ed67ce3/6af1302c28ccef1f7b158b74/northern-cardinal-animated.svg",
       "description": "A crested songbird with a stout seed-cracking bill. The sprite represents the bright red male; females are warm brown with reddish accents.",
       "habitats": [
         "Woodland",
@@ -211,7 +216,8 @@
       "name": "Bald Eagle",
       "scientificName": "Haliaeetus leucocephalus",
       "group": "Birds",
-      "sprite": "/sprites/bald-eagle.svg",
+      "sprite": "https://eu-images.contentstack.com/v3/assets/bltd02904741be28791/bltee1f48f0dfbdbcef/6af1302b76b012b3db518932/bald-eagle.svg",
+      "spriteAnimated": "https://eu-images.contentstack.com/v3/assets/bltd02904741be28791/blt1732298b66670f93/6af1302c142d740ad66aeb55/bald-eagle-animated.svg",
       "description": "Adults combine a white head and tail with broad brown wings. Young eagles lack the full adult white-headed pattern.",
       "habitats": [
         "Lake",
@@ -250,7 +256,8 @@
       "name": "Great Blue Heron",
       "scientificName": "Ardea herodias",
       "group": "Birds",
-      "sprite": "/sprites/great-blue-heron.svg",
+      "sprite": "https://eu-images.contentstack.com/v3/assets/bltd02904741be28791/blt97541ff49f001a33/6af1302a577a7577c1bd3ffa/great-blue-heron.svg",
+      "spriteAnimated": "https://eu-images.contentstack.com/v3/assets/bltd02904741be28791/blta8c87d44fdf5d877/6af1302b0d0dc0688809f6bc/great-blue-heron-animated.svg",
       "description": "A long-legged wader with a folded neck in flight and a dagger-like bill. Look for its patient, deliberate stance beside shallow water.",
       "habitats": [
         "Wetland",
@@ -289,7 +296,8 @@
       "name": "Pileated Woodpecker",
       "scientificName": "Dryocopus pileatus",
       "group": "Birds",
-      "sprite": "/sprites/pileated-woodpecker.svg",
+      "sprite": "https://eu-images.contentstack.com/v3/assets/bltd02904741be28791/blt1b0cc60585ed7672/6af1302a28ccef173f158b70/pileated-woodpecker.svg",
+      "spriteAnimated": "https://eu-images.contentstack.com/v3/assets/bltd02904741be28791/blt86337677e5291874/6af1302a00d179010026d3a4/pileated-woodpecker-animated.svg",
       "description": "A large black woodpecker with bold white face markings and a red crest. It excavates wood in search of insects.",
       "habitats": [
         "Woodland",
@@ -331,7 +339,8 @@
       "name": "Woodland Box Turtle",
       "scientificName": "Terrapene carolina carolina",
       "group": "Reptiles",
-      "sprite": "/sprites/woodland-box-turtle.svg",
+      "sprite": "https://eu-images.contentstack.com/v3/assets/bltd02904741be28791/blt9d1e0a12c282fb1e/6af13029061958127a943d0a/woodland-box-turtle.svg",
+      "spriteAnimated": "https://eu-images.contentstack.com/v3/assets/bltd02904741be28791/blte173a925f1f19f69/6af130290ba0b50600c0e270/woodland-box-turtle-animated.svg",
       "description": "A high-domed land turtle patterned with yellow or orange. Its hinged lower shell can close around its head and limbs.",
       "habitats": [
         "Woodland",
@@ -370,7 +379,8 @@
       "name": "Central Ratsnake",
       "scientificName": "Pantherophis alleghaniensis",
       "group": "Reptiles",
-      "sprite": "/sprites/central-ratsnake.svg",
+      "sprite": "https://eu-images.contentstack.com/v3/assets/bltd02904741be28791/blt6d9e069b06e4e1f6/6af130280ba0b54afec0e26c/central-ratsnake.svg",
+      "spriteAnimated": "https://eu-images.contentstack.com/v3/assets/bltd02904741be28791/blt6404b733b6375541/6af130289dfe1b9f0c5e0ca4/central-ratsnake-animated.svg",
       "description": "A long, often dark-bodied snake associated with wooded edges. Older references may call this animal an eastern or black ratsnake.",
       "habitats": [
         "Woodland",
@@ -406,7 +416,8 @@
       "name": "Five-lined Skink",
       "scientificName": "Plestiodon fasciatus",
       "group": "Reptiles",
-      "sprite": "/sprites/five-lined-skink.svg",
+      "sprite": "https://eu-images.contentstack.com/v3/assets/bltd02904741be28791/blte7c7416a708f6735/6af13027f9f3b7deeac43f5e/five-lined-skink.svg",
+      "spriteAnimated": "https://eu-images.contentstack.com/v3/assets/bltd02904741be28791/bltb6c74eadc70ecf35/6af1302876b012164951892e/five-lined-skink-animated.svg",
       "description": "A sleek, striped lizard that can move quickly into cover. The blue tail shown in the sprite is especially characteristic of young skinks.",
       "habitats": [
         "Woodland",
@@ -443,7 +454,8 @@
       "name": "Eastern Painted Turtle",
       "scientificName": "Chrysemys picta picta",
       "group": "Reptiles",
-      "sprite": "/sprites/painted-turtle.svg",
+      "sprite": "https://eu-images.contentstack.com/v3/assets/bltd02904741be28791/bltb91fccf1169aba4b/6af13026e465fde5b6084c60/painted-turtle.svg",
+      "spriteAnimated": "https://eu-images.contentstack.com/v3/assets/bltd02904741be28791/blt58fc648533945e05/6af13027577a757420bd3ff6/painted-turtle-animated.svg",
       "description": "A low, smooth-shelled freshwater turtle with red accents around the shell margin. Basking sites are an important part of its habitat.",
       "habitats": [
         "Pond",
@@ -477,7 +489,8 @@
       "name": "American Bullfrog",
       "scientificName": "Lithobates catesbeianus",
       "group": "Amphibians",
-      "sprite": "/sprites/american-bullfrog.svg",
+      "sprite": "https://eu-images.contentstack.com/v3/assets/bltd02904741be28791/blt8a0fd8d3f36b763e/6af1302664b20dbc97dc867d/american-bullfrog.svg",
+      "spriteAnimated": "https://eu-images.contentstack.com/v3/assets/bltd02904741be28791/blt6713736d9aa37eec/6af1302606195874db943d06/american-bullfrog-animated.svg",
       "description": "A large green-to-brown frog often seen at the edge of permanent water. Its conspicuous round eardrum sits behind the eye.",
       "habitats": [
         "Pond",
@@ -513,7 +526,8 @@
       "name": "Spotted Salamander",
       "scientificName": "Ambystoma maculatum",
       "group": "Amphibians",
-      "sprite": "/sprites/spotted-salamander.svg",
+      "sprite": "https://eu-images.contentstack.com/v3/assets/bltd02904741be28791/blt4aa5ad13f38fe058/6af130250ba0b58a11c0e268/spotted-salamander.svg",
+      "spriteAnimated": "https://eu-images.contentstack.com/v3/assets/bltd02904741be28791/blt4e80196a25fe86ea/6af1302528ccef739c158b6c/spotted-salamander-animated.svg",
       "description": "A dark, sturdy salamander with rows of yellow spots. Adults spend much of their time sheltered underground.",
       "habitats": [
         "Woodland",
@@ -550,7 +564,8 @@
       "name": "Red-spotted Newt",
       "scientificName": "Notophthalmus viridescens",
       "group": "Amphibians",
-      "sprite": "/sprites/red-spotted-newt.svg",
+      "sprite": "https://eu-images.contentstack.com/v3/assets/bltd02904741be28791/blteac2eb4543d6aeb9/6af1302400d17914bb26d3a0/red-spotted-newt.svg",
+      "spriteAnimated": "https://eu-images.contentstack.com/v3/assets/bltd02904741be28791/blt7e9410f615a4a577/6af13025e465fd2260084c5c/red-spotted-newt-animated.svg",
       "description": "This amphibian changes its look and habitat as it grows. The sprite shows the orange terrestrial eft; aquatic adults are usually olive green.",
       "habitats": [
         "Woodland",
@@ -583,7 +598,8 @@
       "name": "Spring Peeper",
       "scientificName": "Pseudacris crucifer",
       "group": "Amphibians",
-      "sprite": "/sprites/spring-peeper.svg",
+      "sprite": "https://eu-images.contentstack.com/v3/assets/bltd02904741be28791/blt126cb69e38871e3b/6af13023e465fd7a4e084c58/spring-peeper.svg",
+      "spriteAnimated": "https://eu-images.contentstack.com/v3/assets/bltd02904741be28791/blt8972e0c54e4464f5/6af130246bf984b159a0a2c5/spring-peeper-animated.svg",
       "description": "A tiny frog often marked with a dark X on its back. Its familiar high-pitched calls can be easier to notice than the frog itself.",
       "habitats": [
         "Wet meadow",
@@ -617,7 +633,8 @@
       "name": "Brook Trout",
       "scientificName": "Salvelinus fontinalis",
       "group": "Fish",
-      "sprite": "/sprites/brook-trout.svg",
+      "sprite": "https://eu-images.contentstack.com/v3/assets/bltd02904741be28791/bltbf7de32937613f3a/6af13023738be2068eefc083/brook-trout.svg",
+      "spriteAnimated": "https://eu-images.contentstack.com/v3/assets/bltd02904741be28791/blta10ac628aa3c508e/6af130234d0affa514671ae3/brook-trout-animated.svg",
       "description": "A cold-water fish with a patterned back, pale spots, and orange-red fins edged in white. It depends on cool, well-oxygenated streams.",
       "habitats": [
         "Mountain stream",
@@ -654,7 +671,8 @@
       "name": "Largemouth Bass",
       "scientificName": "Micropterus nigricans",
       "group": "Fish",
-      "sprite": "/sprites/largemouth-bass.svg",
+      "sprite": "https://eu-images.contentstack.com/v3/assets/bltd02904741be28791/bltee0652d3d08a1afa/6af1302275fe2a63ab472ec1/largemouth-bass.svg",
+      "spriteAnimated": "https://eu-images.contentstack.com/v3/assets/bltd02904741be28791/bltb287bd27ea5a2911/6af130220d0dc09b5a09f6b8/largemouth-bass-animated.svg",
       "description": "An olive-green ambush predator with a broad mouth and a dark stripe along its side. It often uses submerged cover.",
       "habitats": [
         "Lake",
@@ -690,7 +708,8 @@
       "name": "Bluegill",
       "scientificName": "Lepomis macrochirus",
       "group": "Fish",
-      "sprite": "/sprites/bluegill.svg",
+      "sprite": "https://eu-images.contentstack.com/v3/assets/bltd02904741be28791/blt29c13a91802796ff/6af13021de4e463266fe5963/bluegill.svg",
+      "spriteAnimated": "https://eu-images.contentstack.com/v3/assets/bltd02904741be28791/blt6d7f1bb02d988802/6af1302176b0124c3951892a/bluegill-animated.svg",
       "description": "A deep-bodied sunfish with a dark ear flap and vertical side bars. Colors shift among olive, blue, yellow, and silver.",
       "habitats": [
         "Pond",
@@ -726,7 +745,8 @@
       "name": "Channel Catfish",
       "scientificName": "Ictalurus punctatus",
       "group": "Fish",
-      "sprite": "/sprites/channel-catfish.svg",
+      "sprite": "https://eu-images.contentstack.com/v3/assets/bltd02904741be28791/blt1ee257a58de92d02/6af13020061958fcd6943d02/channel-catfish.svg",
+      "spriteAnimated": "https://eu-images.contentstack.com/v3/assets/bltd02904741be28791/blt8f32f4a97237fdad/6af1302175fe2a857e472ebd/channel-catfish-animated.svg",
       "description": "A smooth-skinned fish with a deeply forked tail and sensitive barbels around its mouth. Deep pools provide useful shelter.",
       "habitats": [
         "River",
@@ -766,7 +786,8 @@
       "name": "Monarch Butterfly",
       "scientificName": "Danaus plexippus",
       "group": "Invertebrates",
-      "sprite": "/sprites/monarch.svg",
+      "sprite": "https://eu-images.contentstack.com/v3/assets/bltd02904741be28791/blt49d02b9baa3caae2/6af1301f21f08f1ba35d5b80/monarch.svg",
+      "spriteAnimated": "https://eu-images.contentstack.com/v3/assets/bltd02904741be28791/blt8fd6f7465cb28696/6af13020f20e2543285eb73d/monarch-animated.svg",
       "description": "An orange-and-black butterfly with pale spots around its wing borders. Adults visit flowers; caterpillars depend on milkweed.",
       "habitats": [
         "Meadow",
@@ -802,7 +823,8 @@
       "name": "Eastern Tiger Swallowtail",
       "scientificName": "Papilio glaucus",
       "group": "Invertebrates",
-      "sprite": "/sprites/tiger-swallowtail.svg",
+      "sprite": "https://eu-images.contentstack.com/v3/assets/bltd02904741be28791/blt80a4a955a31da3b9/6af1301f0ba0b50926c0e260/tiger-swallowtail.svg",
+      "spriteAnimated": "https://eu-images.contentstack.com/v3/assets/bltd02904741be28791/blt4d7efbb34127960d/6af1301f0ba0b51d5cc0e264/tiger-swallowtail-animated.svg",
       "description": "A broad-winged butterfly often yellow with bold black stripes and trailing hindwing tails. Some females have a dark color form.",
       "habitats": [
         "Meadow",
@@ -838,7 +860,8 @@
       "name": "Common Green Darner",
       "scientificName": "Anax junius",
       "group": "Invertebrates",
-      "sprite": "/sprites/green-darner.svg",
+      "sprite": "https://eu-images.contentstack.com/v3/assets/bltd02904741be28791/bltc73143cebd5d84ca/6af1301e142d7454e96aeb51/green-darner.svg",
+      "spriteAnimated": "https://eu-images.contentstack.com/v3/assets/bltd02904741be28791/bltf0a029326efc052f/6af1301ee465fd8147084c54/green-darner-animated.svg",
       "description": "A large dragonfly with a green thorax and a long abdomen. Males often show blue abdominal markings; immature and female colors vary.",
       "habitats": [
         "Pond",
@@ -873,7 +896,8 @@
       "name": "Atlantic Horseshoe Crab",
       "scientificName": "Limulus polyphemus",
       "group": "Invertebrates",
-      "sprite": "/sprites/horseshoe-crab.svg",
+      "sprite": "https://eu-images.contentstack.com/v3/assets/bltd02904741be28791/blta44fdd80dd1ee3d0/6af1301d738be222a2efc07f/horseshoe-crab.svg",
+      "spriteAnimated": "https://eu-images.contentstack.com/v3/assets/bltd02904741be28791/bltcc30fab9701dad12/6af1301e4d0aff7b0b671adf/horseshoe-crab-animated.svg",
       "description": "A marine arthropod with a rounded shield and a long, straight tail. Its coastal life connects shallow-water habitats and migrating shorebirds.",
       "habitats": [
         "Coastal water",

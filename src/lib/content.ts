@@ -3,16 +3,13 @@ import { resolve } from 'node:path';
 import { z } from 'zod';
 import type { Post, Species } from './types.ts';
 
-export const supportedSpriteIds = [
-  'white-tailed-deer', 'black-bear', 'red-fox', 'river-otter',
-  'northern-cardinal', 'bald-eagle', 'great-blue-heron', 'pileated-woodpecker',
-  'woodland-box-turtle', 'central-ratsnake', 'five-lined-skink', 'painted-turtle',
-  'american-bullfrog', 'spotted-salamander', 'red-spotted-newt', 'spring-peeper',
-  'brook-trout', 'largemouth-bass', 'bluegill', 'channel-catfish',
-  'monarch', 'tiger-swallowtail', 'green-darner', 'horseshoe-crab',
-] as const;
 export const supportedRegionIds = ['mountains', 'valley', 'piedmont', 'coastal'] as const;
-const spritePaths = new Set(supportedSpriteIds.map((id) => `/sprites/${id}.svg`));
+/** Contentstack's image CDN, one host per region. Sprites may only come from these. */
+export const contentstackImageHosts = [
+  'images.contentstack.io', 'eu-images.contentstack.com', 'au-images.contentstack.com',
+  'azure-na-images.contentstack.com', 'azure-eu-images.contentstack.com',
+  'gcp-na-images.contentstack.com', 'gcp-eu-images.contentstack.com',
+] as const;
 const safeId = z.string().min(1).max(120).regex(/^[a-z0-9]+(?:[-_][a-z0-9]+)*$/);
 const slug = z.string().min(1).max(180).regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/);
 const text = (max: number) => z.string().max(max);
@@ -22,6 +19,12 @@ const httpsUrl = z.url().refine((value) => {
   const url = new URL(value);
   return url.protocol === 'https:' && !url.username && !url.password;
 }, 'References must use HTTPS without URL credentials');
+const spriteUrl = z.url().refine((value) => {
+  const url = new URL(value);
+  return url.protocol === 'https:' && !url.username && !url.password && !url.search && !url.hash
+    && (contentstackImageHosts as readonly string[]).includes(url.hostname)
+    && url.pathname.startsWith('/v3/assets/') && url.pathname.toLowerCase().endsWith('.svg');
+}, 'Sprites must be SVG files from the Contentstack asset library');
 const measurements = z.tuple([z.number().nonnegative(), z.number().nonnegative()])
   .refine(([min, max]) => min <= max, 'Measurement minimum must not exceed maximum').nullable();
 const uniqueStrings = (schema: z.ZodType<string>, max = 100) => z.array(schema).max(max)
@@ -33,7 +36,8 @@ export const speciesSchema = z.strictObject({
   name: requiredText(180),
   scientificName: requiredText(180),
   group: z.enum(['Mammals', 'Birds', 'Reptiles', 'Amphibians', 'Fish', 'Invertebrates']),
-  sprite: z.string().refine((path) => spritePaths.has(path), 'Choose a supported local sprite'),
+  sprite: spriteUrl,
+  spriteAnimated: spriteUrl.nullable(),
   description: requiredText(5000),
   habitats: uniqueStrings(requiredText(300)).min(1),
   diet: uniqueStrings(requiredText(300)).min(1),

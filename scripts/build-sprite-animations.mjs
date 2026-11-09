@@ -13,7 +13,7 @@ const plans = [
 ];
 const ids = new Set();
 const metadata = {};
-mkdirSync(source('public/sprites/animated'), { recursive: true });
+mkdirSync(source('art/sprites/animated'), { recursive: true });
 
 function pixels(svg) {
   const grid = Array.from({ length: 48 }, () => Array(48).fill(null));
@@ -121,7 +121,7 @@ for (const plan of plans) {
   if (!(plan.duration >= 1 && plan.duration <= 12) || plan.frames[0].length)
     throw new Error(`Invalid timing or resting frame for ${plan.id}`);
   ids.add(plan.id);
-  const original = readFileSync(source(`public${entry.sprite}`), 'utf8');
+  const original = readFileSync(source(`art/sprites/${entry.id}.svg`), 'utf8');
   const base = pixels(original);
   const frames = plan.frames.map((ops) => {
     const frame = base.map((row) => [...row]);
@@ -143,7 +143,7 @@ for (const plan of plans) {
     '@media(prefers-reduced-motion:reduce){.sprite-frame{animation:none!important;opacity:0!important}.frame-0{opacity:1!important}}';
   const title = `Original animated pixel illustration of ${entry.name.replaceAll('&', '&amp;')}`;
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" role="img" aria-labelledby="title" shape-rendering="crispEdges" data-species="${plan.id}" data-sprite-frames="3"><title id="title">${title}</title><style>${css}</style>${frames.map((markup, i) => `<g class="sprite-frame frame-${i}" data-frame="${i}">${markup}</g>`).join('')}</svg>\n`;
-  writeFileSync(source(`public/sprites/animated/${plan.id}.svg`), svg);
+  writeFileSync(source(`art/sprites/animated/${plan.id}.svg`), svg);
   metadata[plan.id] = {
     description: plan.description,
     frames: 3,
@@ -153,7 +153,7 @@ for (const plan of plans) {
 if (ids.size !== species.length)
   throw new Error('Every species must have an animation plan.');
 writeFileSync(
-  source('src/lib/sprite-manifest.json'),
+  source('art/sprites/animated/manifest.json'),
   JSON.stringify(metadata, null, 2) + '\n',
 );
 console.log(`Built ${ids.size} original pixel animations (3 poses each).`);
