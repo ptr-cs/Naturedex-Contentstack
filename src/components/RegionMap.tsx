@@ -103,10 +103,10 @@ export default function RegionMap({
             </clipPath>
           </defs>
           <rect width="680" height="400" fill="url(#map-grid)" />
-          <text x="558" y="76" className="map-water-label">
+          <text x="590" y="164" textAnchor="middle" className="map-water-label">
             CHESAPEAKE
           </text>
-          <text x="579" y="92" className="map-water-label">
+          <text x="590" y="180" textAnchor="middle" className="map-water-label">
             BAY
           </text>
           <path
