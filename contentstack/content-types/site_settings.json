@@ -1,0 +1,63 @@
+{
+  "content_type": {
+    "uid": "site_settings",
+    "title": "Site settings",
+    "description": "Site-wide Naturedex copy: the sidebar tagline, footer line and default search description. There is one entry.",
+    "schema": [
+      {
+        "uid": "title",
+        "display_name": "Internal name",
+        "data_type": "text",
+        "mandatory": true,
+        "multiple": false,
+        "unique": false,
+        "field_metadata": {
+          "multiline": false,
+          "_default": true
+        }
+      },
+      {
+        "uid": "sidebar_tagline",
+        "display_name": "Sidebar tagline",
+        "data_type": "text",
+        "mandatory": true,
+        "multiple": false,
+        "unique": false,
+        "field_metadata": {
+          "multiline": true,
+          "description": "Shown under the navigation. Each line break starts a new line on the site."
+        }
+      },
+      {
+        "uid": "footer_motto",
+        "display_name": "Footer line",
+        "data_type": "text",
+        "mandatory": true,
+        "multiple": false,
+        "unique": false,
+        "field_metadata": {
+          "multiline": false,
+          "description": "Shown at the bottom of every page."
+        }
+      },
+      {
+        "uid": "meta_description",
+        "display_name": "Default search description",
+        "data_type": "text",
+        "mandatory": true,
+        "multiple": false,
+        "unique": false,
+        "field_metadata": {
+          "multiline": true,
+          "description": "Used by search engines and link previews when a page has no description of its own. Keep it under about 160 characters."
+        }
+      }
+    ],
+    "options": {
+      "is_page": false,
+      "singleton": true,
+      "title": "title",
+      "sub_title": []
+    }
+  }
+}

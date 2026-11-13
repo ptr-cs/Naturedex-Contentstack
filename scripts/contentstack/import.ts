@@ -33,7 +33,7 @@ async function list(config: ManagementConfig, path: string, collection: Collecti
 }
 
 export function readModels(): Model[] {
-  return ['species', 'blog_post'].map((uid) => JSON.parse(readFileSync(new URL(`../../contentstack/content-types/${uid}.json`, import.meta.url), 'utf8')) as Model);
+  return ['species', 'blog_post', 'site_settings', 'page'].map((uid) => JSON.parse(readFileSync(new URL(`../../contentstack/content-types/${uid}.json`, import.meta.url), 'utf8')) as Model);
 }
 
 /** `sprite` holds asset UIDs: file fields are set by UID, not URL. */
@@ -65,6 +65,17 @@ export function postEntry(post: ContentSnapshot['posts'][number], uidById: Map<s
   };
 }
 
+export function siteSettingsEntry(site: ContentSnapshot['site']): CmsEntry {
+  return { title: 'Naturedex site settings', sidebar_tagline: site.tagline, footer_motto: site.footerMotto, meta_description: site.metaDescription };
+}
+
+export function pageEntry(page: ContentSnapshot['pages'][number]): CmsEntry {
+  return {
+    title: page.title, stable_id: page.id, eyebrow: page.eyebrow, intro: page.intro, body: page.body,
+    ...(page.link ? { link_label: page.link.label, link_url: page.link.url } : {}),
+  };
+}
+
 function indexStableIds(entries: CmsEntry[]): Map<string, CmsEntry> {
   const result = new Map<string, CmsEntry>();
   for (const entry of entries) {
@@ -93,10 +104,13 @@ export async function importMissingContent(snapshotInput: ContentSnapshot, confi
     await contentstackRequest(new URL('/v3/content_types', regionEndpoints[config.region].management), managementHeaders(config), { method: 'POST', body: model, fetchImpl });
     createdModels++;
   }
-  const [existingSpecies, existingPosts] = await Promise.all([
+  const [existingSpecies, existingPosts, existingSettings, existingPages] = await Promise.all([
     list(config, 'content_types/species/entries', 'entries', fetchImpl),
     list(config, 'content_types/blog_post/entries', 'entries', fetchImpl),
+    list(config, 'content_types/site_settings/entries', 'entries', fetchImpl),
+    list(config, 'content_types/page/entries', 'entries', fetchImpl),
   ]);
+  const pagesById = indexStableIds(existingPages);
   const speciesById = indexStableIds(existingSpecies);
   const postsById = indexStableIds(existingPosts);
   for (const post of snapshot.posts) {
@@ -121,7 +135,14 @@ export async function importMissingContent(snapshotInput: ContentSnapshot, confi
     if (postsById.has(post.id)) continue;
     await create('blog_post', postEntry(post, uidById)); createdPosts++;
   }
-  return { mode: 'applied', createdModels, uploadedSprites: sprites.uploaded, createdSpecies, createdPosts, skippedSpecies: snapshot.species.length - createdSpecies, skippedPosts: snapshot.posts.length - createdPosts, published: 0 };
+  // Site settings is a singleton: any existing entry, edited or not, is kept.
+  let createdSettings = 0; let createdPages = 0;
+  if (!existingSettings.length) { await create('site_settings', siteSettingsEntry(snapshot.site)); createdSettings++; }
+  for (const page of snapshot.pages) {
+    if (pagesById.has(page.id)) continue;
+    await create('page', pageEntry(page)); createdPages++;
+  }
+  return { mode: 'applied', createdModels, uploadedSprites: sprites.uploaded, createdSpecies, createdPosts, createdSettings, createdPages, skippedSpecies: snapshot.species.length - createdSpecies, skippedPosts: snapshot.posts.length - createdPosts, skippedPages: snapshot.pages.length - createdPages, published: 0 };
 }
 
 export async function main(): Promise<void> {
@@ -129,7 +150,7 @@ export async function main(): Promise<void> {
   if (args.some((argument) => argument !== '--apply')) throw new Error('Usage: npm run cms:import [-- --apply]');
   const snapshot = readContentSnapshot();
   if (!args.includes('--apply')) {
-    console.log(JSON.stringify({ mode: 'dry-run', source: 'data/content.json', proposedModels: readModels().map((model) => model.content_type.uid), proposedSpecies: snapshot.species.length, proposedSpriteFiles: 'art/sprites/', proposedPosts: snapshot.posts.length, remoteStateChecked: false, remoteRequests: 0, note: 'Offline proposal only. --apply creates missing content; existing content stays unchanged and nothing is published.' }));
+    console.log(JSON.stringify({ mode: 'dry-run', source: 'data/content.json', proposedModels: readModels().map((model) => model.content_type.uid), proposedSpecies: snapshot.species.length, proposedSpriteFiles: 'art/sprites/', proposedPosts: snapshot.posts.length, proposedSiteSettings: 1, proposedPages: snapshot.pages.map((page) => page.id), remoteStateChecked: false, remoteRequests: 0, note: 'Offline proposal only. --apply creates missing content; existing content stays unchanged and nothing is published.' }));
     return;
   }
   console.log(JSON.stringify(await importMissingContent(snapshot, getManagementConfig())));

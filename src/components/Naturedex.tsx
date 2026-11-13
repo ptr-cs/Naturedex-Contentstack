@@ -1,8 +1,8 @@
 "use client";
-import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
+import { Fragment, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import SystemStatus from './SystemStatus';
 import type { BuildStatus } from '../lib/status';
-import type { Post, Species } from '../lib/types';
+import type { PageCopy, Post, SiteCopy, Species } from '../lib/types';
 import {
   filterSpecies,
   formatRange,
@@ -163,22 +163,31 @@ function Modal({
     </dialog>
   );
 }
+/** The safe Markdown subset: paragraphs and level-two headings, rendered as text. */
+function markdownBlocks(body: string) {
+  return body
+    .split(/\n\s*\n/)
+    .map((part) => part.trim())
+    .filter(Boolean)
+    .map((part, i) =>
+      /^#{1,2} /.test(part) ? (
+        <h2 key={i}>{part.replace(/^#{1,2} /, '')}</h2>
+      ) : (
+        <p key={i}>{part}</p>
+      ),
+    );
+}
 function ContentBody({ body }: { body: string }) {
-  return (
-    <div className="article-body">
-      {body
-        .split(/\n\s*\n/)
-        .map((part, i) =>
-          part.startsWith('## ') ? (
-            <h2 key={i}>{part.replace(/^## /, '')}</h2>
-          ) : part.startsWith('# ') ? (
-            <h2 key={i}>{part.replace(/^# /, '')}</h2>
-          ) : (
-            <p key={i}>{part}</p>
-          ),
-        )}
-    </div>
-  );
+  return <div className="article-body">{markdownBlocks(body)}</div>;
+}
+/** Keeps an editor's line breaks, for short copy like the sidebar tagline. */
+function Lines({ text }: { text: string }) {
+  return text.split(/\r?\n/).map((line, i) => (
+    <Fragment key={i}>
+      {i > 0 && <br />}
+      {line}
+    </Fragment>
+  ));
 }
 function SpeciesDetail({
   entry,
@@ -382,12 +391,16 @@ function NaturedexContent({
   posts,
   cmsUrl,
   status,
+  site,
+  pages,
 }: {
   species: Species[];
   initialPath: string;
   posts: Post[];
   cmsUrl: string;
   status?: BuildStatus;
+  site: SiteCopy;
+  pages: PageCopy[];
 }) {
   const [search, setSearch] = useState('');
   const [group, setGroup] = useState('All');
@@ -418,6 +431,7 @@ function NaturedexContent({
   const isNotFound = initialPath === '/404';
   const isStatus = initialPath === '/status';
   const isGuide = initialPath === '/' || isMap;
+  const pageCopy = pages.find((page) => `/${page.id}` === initialPath);
   const nav = [
     { label: 'Field guide', href: '/', icon: 'book' },
     { label: 'Region map', href: '/map', icon: 'map' },
@@ -526,8 +540,7 @@ function NaturedexContent({
             ♧ ♧ ♧
           </div>
           <p>
-            A little curiosity.
-            <br />A whole wild world.
+            <Lines text={site.tagline} />
           </p>
           <a href="/about">
             <Icon name="info" size={15} />
@@ -587,8 +600,8 @@ function NaturedexContent({
                     ? 'STORIES FROM THE OUTSIDE'
                     : isMap
                       ? 'FOLLOW YOUR CURIOSITY'
-                      : isAbout
-                        ? 'A FIELD GUIDE, WITH A LITTLE NOSTALGIA'
+                      : pageCopy
+                        ? pageCopy.eyebrow
                         : isStatus
                           ? 'BEHIND THE SCENES'
                           : 'VIRGINIA, ONE DISCOVERY AT A TIME'}
@@ -602,8 +615,8 @@ function NaturedexContent({
                       : 'Notes from the field.'
                     : isMap
                       ? 'Adventure has a map.'
-                      : isAbout
-                        ? 'Made for the curious.'
+                      : pageCopy
+                        ? pageCopy.title
                         : isStatus
                           ? 'System status.'
                           : 'Meet your wild neighbors.'}
@@ -615,8 +628,8 @@ function NaturedexContent({
                     ? 'Small observations. Good questions. Stories worth stepping outside for.'
                     : isMap
                       ? 'From mountain trails to tidal shores. Pick a region and see who lives there.'
-                      : isAbout
-                        ? 'An original, pocket-sized guide to the animals that make Virginia home.'
+                      : pageCopy
+                        ? pageCopy.intro
                         : isStatus
                           ? 'What is live on this site, and the checks it passed on the way.'
                           : 'From the Blue Ridge to the bay. Get to know the wildlife just beyond your doorstep.'}
@@ -945,47 +958,17 @@ function NaturedexContent({
                 width="150"
                 height="150"
               />
-              <h2>A familiar feeling. A real wild world.</h2>
-              <p>
-                Naturedex is a Virginia field guide inspired by the curiosity and
-                pixel-filled adventures of handheld games. Its creatures are
-                real Virginia wildlife, and its illustrations are original.
-              </p>
-              <h2>How to read this guide</h2>
-              <p>
-                The entries are a curated collection across six
-                animal groups, not a complete checklist of Virginia wildlife.
-                Size measurements describe general adult ranges where a source
-                supports them. Reference links are provided inside each entry.
-              </p>
-              <p>
-                The map’s regions are broad habitat guides. Pins mark regions,
-                not animal observations or precise distribution boundaries. They
-                are intended to help you explore the collection.
-              </p>
-              <h2>Your own field journal</h2>
-              <p>
-                Field notes and wildlife entries are authored in Contentstack.
-                Published content is included when the site is built. Your discovery
-                collection is saved only in this browser; signing in to the CMS
-                does not synchronize your collection across devices.
-              </p>
-              <h2>Accessible exploration</h2>
-              <p>
-                Every map region has a labeled button. You can explore the
-                complete guide as a list, use the interface with a keyboard, and
-                reduce motion through your device preferences. Automated testing
-                supports this work; manual accessibility evaluation remains an
-                ongoing task.
-              </p>
-              <a
-                className="text-link"
-                href="https://dwr.virginia.gov/wildlife/wildlife-information/"
-                target="_blank"
-                rel="noreferrer"
-              >
-                Explore Virginia DWR’s wildlife resources ↗
-              </a>
+              {pageCopy && markdownBlocks(pageCopy.body)}
+              {pageCopy?.link && (
+                <a
+                  className="text-link"
+                  href={pageCopy.link.url}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  {pageCopy.link.label} ↗
+                </a>
+              )}
             </div>
           )}
           {isStatus && status && <SystemStatus status={status} />}
@@ -1002,7 +985,7 @@ function NaturedexContent({
               NATUREDEX <span className="footer-star">✦</span> VIRGINIA EDITION
             </span>
             <a href="/status/">System status</a>
-            <span>Take only memories. Leave only footprints.</span>
+            <span>{site.footerMotto}</span>
           </footer>
         </main>
       </div>
@@ -1024,6 +1007,8 @@ export default function Naturedex(props: {
   posts: Post[];
   cmsUrl: string;
   status?: BuildStatus;
+  site: SiteCopy;
+  pages: PageCopy[];
 }) {
   return (
     <SpriteMotionProvider>

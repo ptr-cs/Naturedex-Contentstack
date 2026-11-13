@@ -6,9 +6,9 @@ import { readContentSnapshot } from '../../src/lib/content.ts';
 import {
   contentstackRequest, editorUrl, fetchPublishedEntries, getContentstackConfig,
   getManagementConfig, normalizeContentstackEntries, pullContentstack,
-  regionEndpoints, type CmsEntry,
+  regionEndpoints, type CmsCopyEntries, type CmsEntry,
 } from '../../src/lib/contentstack.ts';
-import { importMissingContent, postEntry, readModels, speciesEntry } from '../../scripts/contentstack/import.ts';
+import { importMissingContent, pageEntry, postEntry, readModels, siteSettingsEntry, speciesEntry } from '../../scripts/contentstack/import.ts';
 import { writeSnapshotAtomically } from '../../scripts/contentstack/pull.ts';
 
 const seed = readContentSnapshot();
@@ -31,7 +31,18 @@ const cmsPosts = seed.posts.map((item, index) => ({
   ...postEntry(item, uidById), uid: 'post_' + index,
   created_at: item.createdAt, updated_at: item.updatedAt,
 }));
+const cmsCopy: CmsCopyEntries = {
+  settings: [{ ...siteSettingsEntry(seed.site), uid: 'settings_0' }],
+  pages: seed.pages.map((page, index) => ({ ...pageEntry(page), uid: 'page_' + index })),
+};
 const syncedAt = '2026-11-06T12:00:00.000Z';
+const normalize = (species: CmsEntry[], posts: CmsEntry[], at = syncedAt, copy = cmsCopy) => normalizeContentstackEntries(species, posts, at, copy);
+/** Routes a Delivery or Management entries request to the matching fixture collection. */
+function fixtureEntries(url: URL, overrides: Partial<Record<'species' | 'blog_post' | 'site_settings' | 'page', CmsEntry[]>> = {}): CmsEntry[] {
+  const type = url.pathname.split('/')[3] as 'species' | 'blog_post' | 'site_settings' | 'page';
+  const defaults = { species: cmsSpecies, blog_post: cmsPosts, site_settings: cmsCopy.settings, page: cmsCopy.pages };
+  return overrides[type] ?? defaults[type];
+}
 const json = (value: unknown, status = 200) => new Response(JSON.stringify(value), { status });
 function mockFetch(handler: (url: URL, init: RequestInit) => Response | Promise<Response>) {
   return vi.fn<typeof fetch>(async (input, init) => handler(new URL(String(input)), init || {}));
@@ -164,7 +175,7 @@ describe('complete published content pagination', () => {
 
 describe('native field normalization and references', () => {
   it('round trips all original species and all four current published posts', () => {
-    const result = normalizeContentstackEntries(cmsSpecies, cmsPosts, syncedAt);
+    const result = normalize(cmsSpecies, cmsPosts);
     expect(result.source).toBe('contentstack');
     expect(result.syncedAt).toBe(syncedAt);
     expect(result.species).toEqual(seed.species);
@@ -175,11 +186,11 @@ describe('native field normalization and references', () => {
 
   it('reads sprites from asset fields and rejects anything but a library SVG', () => {
     const entry = structuredClone(cmsSpecies[0]);
-    const result = normalizeContentstackEntries([{ ...entry, sprite_animation: undefined }], [], syncedAt);
+    const result = normalize([{ ...entry, sprite_animation: undefined }], []);
     expect(result.species[0].sprite).toBe(seed.species[0].sprite);
     expect(result.species[0].spriteAnimated).toBeNull();
     const asset = entry.sprite_image as CmsEntry;
-    const bad = (sprite_image: unknown) => () => normalizeContentstackEntries([{ ...entry, sprite_image }], [], syncedAt);
+    const bad = (sprite_image: unknown) => () => normalize([{ ...entry, sprite_image }], []);
     expect(bad(undefined)).toThrow('Sprite is missing');
     expect(bad('blt123')).toThrow('not an asset');
     expect(bad({ ...asset, content_type: 'image/png' })).toThrow('SVG');
@@ -192,7 +203,7 @@ describe('native field normalization and references', () => {
   it('retains unknown measurement ranges as null and accepts explicitly sourced zero endpoints', () => {
     const entry = structuredClone(cmsSpecies[0]);
     entry.size = { length_min_cm: 0, length_max_cm: 1 };
-    const result = normalizeContentstackEntries([entry], [], syncedAt);
+    const result = normalize([entry], []);
     expect(result.species[0].size).toEqual({ lengthCm: [0, 1], weightKg: null, note: '' });
   });
 
@@ -200,7 +211,7 @@ describe('native field normalization and references', () => {
     { length_min_cm: 1 }, { length_min_cm: -1, length_max_cm: 2 },
     { length_min_cm: 2, length_max_cm: 1 }, { weight_min_kg: '1', weight_max_kg: 2 },
   ])('rejects malformed measurement pairs: %j', (size) => {
-    expect(() => normalizeContentstackEntries([{ ...cmsSpecies[0], size }], [], syncedAt)).toThrow();
+    expect(() => normalize([{ ...cmsSpecies[0], size }], [])).toThrow();
   });
 
   it.each([
@@ -208,31 +219,74 @@ describe('native field normalization and references', () => {
     [{ uid: cmsSpecies[0].uid, _content_type_uid: 'other_type' }],
     [null], ['species_0'], {},
   ])('rejects missing, unpublished or invalid species references: %j', (related_species) => {
-    expect(() => normalizeContentstackEntries(cmsSpecies, [{ ...cmsPosts[0], related_species }], syncedAt)).toThrow();
+    expect(() => normalize(cmsSpecies, [{ ...cmsPosts[0], related_species }])).toThrow();
   });
 
   it('rejects duplicate native species UIDs', () => {
-    expect(() => normalizeContentstackEntries([cmsSpecies[0], cmsSpecies[0]], [], syncedAt)).toThrow('unique');
+    expect(() => normalize([cmsSpecies[0], cmsSpecies[0]], [])).toThrow('unique');
   });
 
   it('uses native timestamps and permits an article without optional labels/dates/references', () => {
-    const result = normalizeContentstackEntries(cmsSpecies, [{
+    const result = normalize(cmsSpecies, [{
       stable_id: 'standalone', slug: 'standalone', title: 'Standalone', body: 'A field note.',
-    }], syncedAt);
+    }]);
     expect(result.posts[0]).toMatchObject({ category: 'Field notes', excerpt: '', relatedSpeciesIds: [], status: 'published' });
     expect(result.posts[0]).not.toHaveProperty('author');
     expect(result.posts[0]).not.toHaveProperty('publishedAt');
   });
 
-  it('combines the two published collections without fetching any management endpoint', async () => {
+  it('combines the four published collections without fetching any management endpoint', async () => {
     const fetchImpl = mockFetch((url) => {
       expect(url.origin).toBe(regionEndpoints['aws-na'].delivery);
-      const entries = url.pathname.includes('/species/') ? cmsSpecies : cmsPosts;
+      const entries = fixtureEntries(url);
       return json({ entries, count: entries.length });
     });
     const result = await pullContentstack(config, fetchImpl);
     expect(result.posts).toHaveLength(4);
-    expect(fetchImpl).toHaveBeenCalledTimes(2);
+    expect(result.site).toEqual(seed.site);
+    expect(result.pages).toEqual(seed.pages);
+    expect(fetchImpl).toHaveBeenCalledTimes(4);
+  });
+});
+
+describe('site and page copy', () => {
+  const about = cmsCopy.pages[0];
+  const withPage = (change: CmsEntry) => () => normalize(cmsSpecies, cmsPosts, syncedAt, { ...cmsCopy, pages: [{ ...about, ...change }] });
+
+  it('keeps line breaks and Markdown as text, and treats empty optional fields as absent', () => {
+    const result = normalize(cmsSpecies, cmsPosts, syncedAt, {
+      settings: [{ ...cmsCopy.settings[0], sidebar_tagline: 'One.\nTwo.' }],
+      pages: [{ ...about, body: undefined, link_label: '', link_url: null }],
+    });
+    expect(result.site.tagline).toBe('One.\nTwo.');
+    expect(result.pages[0]).toMatchObject({ id: 'about', body: '', link: null });
+  });
+
+  it('requires exactly one published Site settings entry', () => {
+    expect(() => normalize(cmsSpecies, cmsPosts, syncedAt, { ...cmsCopy, settings: [] })).toThrow('Site settings is not published');
+    expect(() => normalize(cmsSpecies, cmsPosts, syncedAt, { ...cmsCopy, settings: [cmsCopy.settings[0], cmsCopy.settings[0]] })).toThrow('more than one');
+    expect(() => normalize(cmsSpecies, cmsPosts, syncedAt, { ...cmsCopy, settings: [{ ...cmsCopy.settings[0], footer_motto: ' ' }] })).toThrow('site.footerMotto');
+  });
+
+  it('requires the About page and rejects duplicate page IDs', () => {
+    expect(() => normalize(cmsSpecies, cmsPosts, syncedAt, { ...cmsCopy, pages: [] })).toThrow('Missing copy for the about page');
+    expect(() => normalize(cmsSpecies, cmsPosts, syncedAt, { ...cmsCopy, pages: [about, { ...about, uid: 'page_copy' }] })).toThrow('Duplicate page IDs');
+  });
+
+  it.each([
+    { link_label: 'Read more', link_url: '' }, { link_label: '', link_url: 'https://example.com/' },
+  ])('rejects a half-filled link: %j', (change) => {
+    expect(withPage(change)).toThrow('Link text and Link URL');
+  });
+
+  it.each(['http://example.com/', 'javascript:alert(1)', 'https://user:pw@example.com/'])('rejects an unsafe link URL: %s', (link_url) => {
+    expect(withPage({ link_url })).toThrow('pages.0.link.url');
+  });
+
+  it('rejects missing headings and malformed page IDs', () => {
+    expect(withPage({ title: '' })).toThrow('pages.0.title');
+    expect(withPage({ eyebrow: undefined })).toThrow('pages.0.eyebrow');
+    expect(withPage({ stable_id: 'About Page' })).toThrow('pages.0.id');
   });
 });
 
@@ -244,7 +298,7 @@ describe('atomic snapshots and safe native import', () => {
       await writeFile(file, 'previous reviewed snapshot');
       await expect(writeSnapshotAtomically({ ...seed, source: 'contentstack', syncedAt: null }, file)).rejects.toThrow();
       expect(await readFile(file, 'utf8')).toBe('previous reviewed snapshot');
-      const result = normalizeContentstackEntries(cmsSpecies, cmsPosts, syncedAt);
+      const result = normalize(cmsSpecies, cmsPosts);
       await writeSnapshotAtomically(result, file);
       expect(JSON.parse(await readFile(file, 'utf8'))).toEqual(result);
     } finally { await rm(directory, { recursive: true, force: true }); }
@@ -253,12 +307,15 @@ describe('atomic snapshots and safe native import', () => {
   it('skips existing CMS entries even when editors changed their content, issuing no writes', async () => {
     const fetchImpl = mockFetch((url, init) => {
       expect(init.method).toBe('GET');
-      if (url.pathname === '/v3/content_types') return json({ content_types: modelRecords(), count: 2 });
-      const entries = url.pathname.includes('/species/') ? cmsSpecies : cmsPosts.map((post) => ({ ...post, body: 'An authored edit that must survive.' }));
+      if (url.pathname === '/v3/content_types') return json({ content_types: modelRecords(), count: 4 });
+      const entries = fixtureEntries(url, {
+        blog_post: cmsPosts.map((post) => ({ ...post, body: 'An authored edit that must survive.' })),
+        site_settings: [{ ...cmsCopy.settings[0], footer_motto: 'An edited footer.' }],
+      });
       return json({ entries, count: entries.length });
     });
     const result = await importMissingContent(seed, management, fetchImpl);
-    expect(result).toMatchObject({ createdModels: 0, createdSpecies: 0, createdPosts: 0, skippedPosts: 4, published: 0 });
+    expect(result).toMatchObject({ createdModels: 0, createdSpecies: 0, createdPosts: 0, createdSettings: 0, createdPages: 0, skippedPosts: 4, skippedPages: 1, published: 0 });
   });
 
   it('creates missing models, sprite assets and entries with native references, never updating or publishing', async () => {
@@ -284,8 +341,10 @@ describe('atomic snapshots and safe native import', () => {
       return url.pathname === '/v3/content_types' ? json(body) : json({ entry: { ...(body.entry as CmsEntry), uid: 'created_' + (++created) } });
     });
     const result = await importMissingContent(seed, management, fetchImpl);
-    expect(result).toMatchObject({ createdModels: 2, uploadedSprites: 48, createdSpecies: 24, createdPosts: 4, published: 0 });
-    expect(writes).toHaveLength(31); // 2 models + 1 folder + 24 species + 4 posts
+    expect(result).toMatchObject({ createdModels: 4, uploadedSprites: 48, createdSpecies: 24, createdPosts: 4, createdSettings: 1, createdPages: 1, published: 0 });
+    expect(writes).toHaveLength(35); // 4 models + 1 folder + 24 species + 4 posts + settings + about page
+    expect(writes.find((write) => write.path.includes('/site_settings/entries'))!.body.entry).toEqual(siteSettingsEntry(seed.site));
+    expect(writes.find((write) => write.path.includes('/page/entries'))!.body.entry).toMatchObject({ stable_id: 'about', link_url: seed.pages[0].link!.url });
     expect(uploads).toHaveLength(48);
     expect(uploads.every((upload) => upload.type === 'image/svg+xml' && upload.folder === 'sprite_folder')).toBe(true);
     expect(uploads.map((upload) => upload.name)).toContain(`${seed.species[0].id}-animated.svg`);
@@ -308,8 +367,8 @@ describe('atomic snapshots and safe native import', () => {
   it('blocks an existing slug owned by another stable ID', async () => {
     const fetchImpl = mockFetch((url, init) => {
       expect(init.method).toBe('GET');
-      if (url.pathname === '/v3/content_types') return json({ content_types: modelRecords(), count: 2 });
-      const entries = url.pathname.includes('/species/') ? cmsSpecies : [{ ...cmsPosts[0], stable_id: 'different-entry' }];
+      if (url.pathname === '/v3/content_types') return json({ content_types: modelRecords(), count: 4 });
+      const entries = fixtureEntries(url, { blog_post: [{ ...cmsPosts[0], stable_id: 'different-entry' }] });
       return json({ entries, count: entries.length });
     });
     await expect(importMissingContent(seed, management, fetchImpl)).rejects.toThrow('slug');

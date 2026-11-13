@@ -19,6 +19,6 @@ const title = article?.title || ({ '/': 'Virginia field guide', '/map': 'Region 
 const cmsUrl = editorUrl({ ...import.meta.env, ...process.env });
 const status = currentPath === '/status' ? buildStatus(snapshot) : undefined;
 ---
-<Page title={title} description={article?.excerpt} noindex={currentPath === '/editor' || currentPath === '/status'}>
-  <Naturedex client:load species={snapshot.species} posts={snapshot.posts} initialPath={currentPath} cmsUrl={cmsUrl} status={status} />
+<Page title={title} description={article?.excerpt || snapshot.site.metaDescription} noindex={currentPath === '/editor' || currentPath === '/status'}>
+  <Naturedex client:load species={snapshot.species} posts={snapshot.posts} initialPath={currentPath} cmsUrl={cmsUrl} status={status} site={snapshot.site} pages={snapshot.pages} />
 </Page>

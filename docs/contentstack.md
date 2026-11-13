@@ -26,7 +26,7 @@ Two Contentstack behaviours to know about: the field name `region_ids` is reserv
 
 ## Content model
 
-The native schema JSON files are under contentstack/content-types. Species entries contain common/scientific names, group, number, text descriptions, multiple habitat/diet values, activity, measurement endpoints and qualifications, illustrative region associations, primary source URLs, and two asset fields: **Sprite** (required) and **Animated sprite** (optional).
+The native schema JSON files are under contentstack/content-types: species, field notes (blog_post), Site settings (site_settings) and Page (page). Species entries contain common/scientific names, group, number, text descriptions, multiple habitat/diet values, activity, measurement endpoints and qualifications, illustrative region associations, primary source URLs, and two asset fields: **Sprite** (required) and **Animated sprite** (optional).
 
 ### Sprites live in the asset library
 
@@ -35,6 +35,15 @@ Each species' pixel art is an SVG in the asset library's **Naturedex sprites** f
 To add a species with new art: upload the SVG (or two, still and animated) to **Naturedex sprites**, pick them in the entry's Sprite fields, then publish the assets and the entry. No code change is needed. A pull rejects a sprite that isn't an SVG, is over 512 KB, or isn't served from a Contentstack image host.
 
 The original art and its generator stay in the repository (`art/sprites/`, `npm run sprites:build`). `npm run cms:migrate-sprites` moved them into the library: a read-only plan by default, `-- --apply` to upload, link and publish, and `-- --finalize` to remove the old text field. It's safe to rerun.
+
+### Site copy and pages
+
+Site-wide wording and fixed pages are edited in Contentstack too:
+
+- **Site settings** has one entry: the sidebar tagline (each line break shows as a new line), the footer line, and the default search description used for link previews.
+- **Page** has one entry per fixed page, matched by its **Page ID**. `about` is the first. Each has an eyebrow, a heading, an introduction, an optional Markdown body (paragraphs and `## ` headings) and an optional link. The link needs both text and an `https://` URL.
+
+Layout stays in code: the About page's deer, the map's positions and colours, and the navigation. A pull fails, keeping the last snapshot, if Site settings or the About page is unpublished, a required field is empty, or a link is half filled. To give a page its copy from the CMS, add its ID to `requiredPageIds` in `src/lib/content.ts`, read it from `pages` in the component, then create and publish its Page entry.
 
 Field notes contain a stable ID, slug, title, excerpt, Markdown body, category, author label, original publication date and native references to species entries. Application creation/update timestamps come from Contentstack's native metadata. The importer does not attempt to overwrite those system fields with historical timestamps.
 

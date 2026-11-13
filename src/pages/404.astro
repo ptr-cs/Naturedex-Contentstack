@@ -5,6 +5,6 @@ import { readContentSnapshot } from '../lib/content';
 import { editorUrl } from '../lib/contentstack';
 const snapshot = readContentSnapshot();
 ---
-<Page title="Trail not found" noindex>
-  <Naturedex client:load species={snapshot.species} posts={snapshot.posts} initialPath="/404" cmsUrl={editorUrl({ ...import.meta.env, ...process.env })} />
+<Page title="Trail not found" description={snapshot.site.metaDescription} noindex>
+  <Naturedex client:load species={snapshot.species} posts={snapshot.posts} initialPath="/404" cmsUrl={editorUrl({ ...import.meta.env, ...process.env })} site={snapshot.site} pages={snapshot.pages} />
 </Page>

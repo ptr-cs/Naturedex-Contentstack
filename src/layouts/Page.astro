@@ -1,7 +1,8 @@
 ---
 import '../styles/global.css';
-interface Props { title: string; description?: string; noindex?: boolean; }
-const { title, description = 'Meet Virginia’s wildlife through original animated pixel art, an interactive region map, and field notes for the curious.', noindex = false } = Astro.props;
+/** `description` comes from the CMS: a field note's excerpt, or Site settings' default. */
+interface Props { title: string; description: string; noindex?: boolean; }
+const { title, description, noindex = false } = Astro.props;
 const canonical = new URL(Astro.url.pathname, Astro.site);
 ---
 <!doctype html>

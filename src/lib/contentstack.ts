@@ -10,7 +10,9 @@ export const regionEndpoints = {
   'gcp-eu': { delivery: 'https://gcp-eu-cdn.contentstack.com', management: 'https://gcp-eu-api.contentstack.com', editor: 'https://gcp-eu-app.contentstack.com/' },
 } as const;
 export type ContentstackRegion = keyof typeof regionEndpoints;
-export type ContentType = 'species' | 'blog_post';
+export type ContentType = 'species' | 'blog_post' | 'site_settings' | 'page';
+/** Published Site settings and Page entries, as the Delivery API returns them. */
+export interface CmsCopyEntries { settings: CmsEntry[]; pages: CmsEntry[] }
 export type CmsEntry = Record<string, unknown>;
 type Environment = Record<string, string | undefined>;
 export interface BaseConfig { apiKey: string; region: ContentstackRegion; locale: string; branch?: string }
@@ -150,7 +152,27 @@ function range(group: CmsEntry, min: string, max: string): [unknown, unknown] | 
   return [low, high]; // Validation rejects incomplete, negative and reversed pairs.
 }
 
-export function normalizeContentstackEntries(speciesEntries: CmsEntry[], postEntries: CmsEntry[], syncedAt = new Date().toISOString()): ContentSnapshot {
+/** Contentstack returns empty optional text fields as '' or leaves them out. */
+function optionalText(value: unknown): unknown {
+  return value === undefined || value === null || (typeof value === 'string' && !value.trim()) ? '' : value;
+}
+
+function normalizeCopy(copy: CmsCopyEntries) {
+  if (copy.settings.length !== 1) throw new Error(copy.settings.length ? 'Contentstack returned more than one Site settings entry.' : 'Site settings is not published. Publish the Site settings entry.');
+  const [settings] = copy.settings;
+  const site = { tagline: settings.sidebar_tagline, footerMotto: settings.footer_motto, metaDescription: settings.meta_description };
+  const pages = copy.pages.map((entry) => {
+    const label = optionalText(entry.link_label); const url = optionalText(entry.link_url);
+    if ((label === '') !== (url === '')) throw new Error(`Page ${String(entry.stable_id)}: set both Link text and Link URL, or neither.`);
+    return {
+      id: entry.stable_id, eyebrow: entry.eyebrow, title: entry.title, intro: entry.intro,
+      body: optionalText(entry.body), link: label === '' ? null : { label, url },
+    };
+  });
+  return { site, pages };
+}
+
+export function normalizeContentstackEntries(speciesEntries: CmsEntry[], postEntries: CmsEntry[], syncedAt = new Date().toISOString(), copy: CmsCopyEntries): ContentSnapshot {
   const species = speciesEntries.map((entry) => {
     const size = entry.size && typeof entry.size === 'object' && !Array.isArray(entry.size) ? entry.size as CmsEntry : {};
     return {
@@ -186,8 +208,9 @@ export function normalizeContentstackEntries(speciesEntries: CmsEntry[], postEnt
       ...(entry.published_at ? { publishedAt: entry.published_at } : {}),
     };
   });
-  const snapshot = validateContentSnapshot({ schemaVersion: 1, source: 'contentstack', syncedAt, species, posts });
+  const snapshot = validateContentSnapshot({ schemaVersion: 1, source: 'contentstack', syncedAt, species, posts, ...normalizeCopy(copy) });
   snapshot.species.sort((a, b) => a.dexNumber - b.dexNumber);
+  snapshot.pages.sort((a, b) => a.id.localeCompare(b.id));
   snapshot.posts.sort((a, b) => (b.publishedAt || b.createdAt || '').localeCompare(a.publishedAt || a.createdAt || '') || a.slug.localeCompare(b.slug));
   return snapshot;
 }
@@ -195,9 +218,11 @@ export function normalizeContentstackEntries(speciesEntries: CmsEntry[], postEnt
 export async function pullContentstack(config: ContentstackConfig, fetchImpl: typeof fetch = fetch): Promise<ContentSnapshot> {
   // Fetches are read-only and independent; validation happens before any file
   // replacement. CDA delivery tokens retrieve published entries only.
-  const [species, posts] = await Promise.all([
+  const [species, posts, settings, pages] = await Promise.all([
     fetchPublishedEntries(config, 'species', fetchImpl),
     fetchPublishedEntries(config, 'blog_post', fetchImpl),
+    fetchPublishedEntries(config, 'site_settings', fetchImpl),
+    fetchPublishedEntries(config, 'page', fetchImpl),
   ]);
-  return normalizeContentstackEntries(species, posts);
+  return normalizeContentstackEntries(species, posts, undefined, { settings, pages });
 }

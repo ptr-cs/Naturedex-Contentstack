@@ -37,3 +37,20 @@ export interface Post {
   updatedAt?: string;
   publishedAt?: string;
 }
+/** Site-wide copy, edited in Contentstack's single Site settings entry. */
+export interface SiteCopy {
+  /** Line breaks are kept: each line renders on its own line. */
+  tagline: string;
+  footerMotto: string;
+  metaDescription: string;
+}
+/** Copy for one fixed page, matched to the page by `id` (for example `about`). */
+export interface PageCopy {
+  id: string;
+  eyebrow: string;
+  title: string;
+  intro: string;
+  /** Markdown subset: paragraphs and level-two headings. */
+  body: string;
+  link: { label: string; url: string } | null;
+}

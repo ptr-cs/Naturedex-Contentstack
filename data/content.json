@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "source": "contentstack",
-  "syncedAt": "2026-11-09T02:32:22.044Z",
+  "syncedAt": "2026-11-13T00:32:45.754Z",
   "species": [
     {
       "id": "white-tailed-deer",
@@ -998,6 +998,24 @@
       "createdAt": "2026-11-08T21:21:27.919Z",
       "updatedAt": "2026-11-08T21:21:27.919Z",
       "publishedAt": "2026-11-03T00:00:00+00:00"
+    }
+  ],
+  "site": {
+    "tagline": "A little curiosity.\nA whole wild world.",
+    "footerMotto": "Take only memories. Leave only footprints.",
+    "metaDescription": "Meet Virginia’s wildlife through original animated pixel art, an interactive region map, and field notes for the curious."
+  },
+  "pages": [
+    {
+      "id": "about",
+      "eyebrow": "A FIELD GUIDE, WITH A LITTLE NOSTALGIA",
+      "title": "Made for the curious.",
+      "intro": "An original, pocket-sized guide to the animals that make Virginia home.",
+      "body": "## A familiar feeling. A real wild world.\n\nNaturedex is a Virginia field guide inspired by the curiosity and pixel-filled adventures of handheld games. Its creatures are real Virginia wildlife, and its illustrations are original.\n\n## How to read this guide\n\nThe entries are a curated collection across six animal groups, not a complete checklist of Virginia wildlife. Size measurements describe general adult ranges where a source supports them. Reference links are provided inside each entry.\n\nThe map’s regions are broad habitat guides. Pins mark regions, not animal observations or precise distribution boundaries. They are intended to help you explore the collection.\n\n## Your own field journal\n\nField notes and wildlife entries are authored in Contentstack. Published content is included when the site is built. Your discovery collection is saved only in this browser; signing in to the CMS does not synchronize your collection across devices.\n\n## Accessible exploration\n\nEvery map region has a labeled button. You can explore the complete guide as a list, use the interface with a keyboard, and reduce motion through your device preferences. Automated testing supports this work; manual accessibility evaluation remains an ongoing task.",
+      "link": {
+        "label": "Explore Virginia DWR’s wildlife resources",
+        "url": "https://dwr.virginia.gov/wildlife/wildlife-information/"
+      }
     }
   ]
 }

@@ -1,0 +1,101 @@
+{
+  "content_type": {
+    "uid": "page",
+    "title": "Page",
+    "description": "Copy for a fixed Naturedex page. The Page ID connects an entry to its page; the layout, map and sprites stay in code.",
+    "schema": [
+      {
+        "uid": "title",
+        "display_name": "Heading",
+        "data_type": "text",
+        "mandatory": true,
+        "multiple": false,
+        "unique": false,
+        "field_metadata": {
+          "multiline": false,
+          "_default": true
+        }
+      },
+      {
+        "uid": "stable_id",
+        "display_name": "Page ID",
+        "data_type": "text",
+        "mandatory": true,
+        "multiple": false,
+        "unique": true,
+        "field_metadata": {
+          "multiline": false,
+          "description": "Which page this copy belongs to, for example about. Do not change it after publishing."
+        },
+        "format": "^[a-z0-9]+(?:[-_][a-z0-9]+)*$"
+      },
+      {
+        "uid": "eyebrow",
+        "display_name": "Eyebrow",
+        "data_type": "text",
+        "mandatory": true,
+        "multiple": false,
+        "unique": false,
+        "field_metadata": {
+          "multiline": false,
+          "description": "The small capitals line above the heading."
+        }
+      },
+      {
+        "uid": "intro",
+        "display_name": "Introduction",
+        "data_type": "text",
+        "mandatory": true,
+        "multiple": false,
+        "unique": false,
+        "field_metadata": {
+          "multiline": true,
+          "description": "The sentence under the heading."
+        }
+      },
+      {
+        "uid": "body",
+        "display_name": "Body (Markdown)",
+        "data_type": "text",
+        "mandatory": false,
+        "multiple": false,
+        "unique": false,
+        "field_metadata": {
+          "markdown": true,
+          "description": "Plain Markdown; the site supports paragraphs and level-two headings (## Heading)."
+        }
+      },
+      {
+        "uid": "link_label",
+        "display_name": "Link text",
+        "data_type": "text",
+        "mandatory": false,
+        "multiple": false,
+        "unique": false,
+        "field_metadata": {
+          "multiline": false,
+          "description": "Optional link shown after the body."
+        }
+      },
+      {
+        "uid": "link_url",
+        "display_name": "Link URL",
+        "data_type": "text",
+        "mandatory": false,
+        "multiple": false,
+        "unique": false,
+        "field_metadata": {
+          "multiline": false,
+          "description": "Required when Link text is set. Must start with https://."
+        },
+        "format": "^https://\\S+$"
+      }
+    ],
+    "options": {
+      "is_page": false,
+      "singleton": false,
+      "title": "title",
+      "sub_title": []
+    }
+  }
+}

@@ -20,7 +20,7 @@ export async function main(): Promise<void> {
   if (process.argv.length > 2) throw new Error('cms:pull does not accept arguments. Configure Contentstack through the private environment.');
   const snapshot = await pullContentstack(getContentstackConfig());
   await writeSnapshotAtomically(snapshot, resolve(process.cwd(), 'data/content.json'));
-  console.log(JSON.stringify({ source: snapshot.source, syncedAt: snapshot.syncedAt, species: snapshot.species.length, publishedPosts: snapshot.posts.length, output: 'data/content.json' }));
+  console.log(JSON.stringify({ source: snapshot.source, syncedAt: snapshot.syncedAt, species: snapshot.species.length, publishedPosts: snapshot.posts.length, pages: snapshot.pages.map((page) => page.id), output: 'data/content.json' }));
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1])).href) {

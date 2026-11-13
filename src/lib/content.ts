@@ -1,8 +1,10 @@
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { z } from 'zod';
-import type { Post, Species } from './types.ts';
+import type { PageCopy, Post, SiteCopy, Species } from './types.ts';
 
+/** Pages whose copy must come from the CMS. A pull fails while any is unpublished. */
+export const requiredPageIds = ['about'] as const;
 export const supportedRegionIds = ['mountains', 'valley', 'piedmont', 'coastal'] as const;
 /** Contentstack's image CDN, one host per region. Sprites may only come from these. */
 export const contentstackImageHosts = [
@@ -64,12 +66,29 @@ export const postSchema = z.strictObject({
   publishedAt: isoDate.optional(),
 });
 
+export const siteSchema = z.strictObject({
+  tagline: requiredText(300),
+  footerMotto: requiredText(200),
+  metaDescription: requiredText(300),
+});
+
+export const pageSchema = z.strictObject({
+  id: safeId,
+  eyebrow: requiredText(120),
+  title: requiredText(180),
+  intro: requiredText(1000),
+  body: text(20000),
+  link: z.strictObject({ label: requiredText(120), url: httpsUrl }).nullable(),
+});
+
 const snapshotSchema = z.strictObject({
   schemaVersion: z.literal(1),
   source: z.enum(['seed', 'contentstack']),
   syncedAt: isoDate.nullable(),
   species: z.array(speciesSchema).min(1).max(10000),
   posts: z.array(postSchema).max(10000),
+  site: siteSchema,
+  pages: z.array(pageSchema).max(100),
 }).superRefine((snapshot, context) => {
   if ((snapshot.source === 'seed') !== (snapshot.syncedAt === null)) {
     context.addIssue({ code: 'custom', path: ['syncedAt'], message: 'Seed snapshots use null; Contentstack snapshots require a sync timestamp' });
@@ -79,8 +98,12 @@ const snapshotSchema = z.strictObject({
     ['dex numbers', snapshot.species.map((item) => item.dexNumber)],
     ['post IDs', snapshot.posts.map((item) => item.id)],
     ['post slugs', snapshot.posts.map((item) => item.slug)],
+    ['page IDs', snapshot.pages.map((item) => item.id)],
   ] as const) {
     if (new Set<string | number>(values).size !== values.length) context.addIssue({ code: 'custom', message: `Duplicate ${key}` });
+  }
+  for (const id of requiredPageIds) {
+    if (!snapshot.pages.some((page) => page.id === id)) context.addIssue({ code: 'custom', path: ['pages'], message: `Missing copy for the ${id} page. Publish its Page entry.` });
   }
   const knownSpecies = new Set(snapshot.species.map((item) => item.id));
   snapshot.posts.forEach((post, index) => {
@@ -99,6 +122,8 @@ export interface ContentSnapshot {
   syncedAt: string | null;
   species: Species[];
   posts: Post[];
+  site: SiteCopy;
+  pages: PageCopy[];
 }
 
 /** Build-only validation. Never fall back to seed after a failed CMS pull. */
