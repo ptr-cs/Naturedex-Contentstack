@@ -66,6 +66,8 @@ This runs the production build, unit/coverage checks, Playwright browser and acc
 
 ## Deploy to AWS
 
+![Naturedex Contentstack on AWS](docs/aws-architecture.png)
+
 ```sh
 aws login
 npm run deploy:aws            # stack + build + upload + CloudFront invalidation

@@ -4,6 +4,10 @@ Naturedex's AWS artifact is the static Astro `dist/` directory. Contentstack rem
 
 The site is deployed with `npm run deploy:aws` (see the README) and updated by GitHub Actions (see [publish to live](publishing.md) and [architecture](architecture.md)). This page is the manual reference: what the template creates, a custom domain, rollback and cleanup.
 
+![Naturedex Contentstack on AWS: Contentstack webhook, Lambda relay, GitHub Actions build, IAM deploy role, private S3 behind CloudFront, and sprite images served from Contentstack's image CDN](aws-architecture.png)
+
+The diagram's source is [aws-architecture.drawio](aws-architecture.drawio); open it in draw.io (diagrams.net) to edit, then export a PNG at 1.5× scale.
+
 ## Prepare and review locally
 
 ```sh
