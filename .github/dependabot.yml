@@ -1,0 +1,16 @@
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+  # Build-time packages. Visitors only get static files, so these matter for
+  # the build and the deploy runner, not the live site.
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      dependencies:
+        patterns:
+          - '*'
