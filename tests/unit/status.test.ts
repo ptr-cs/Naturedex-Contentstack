@@ -51,7 +51,7 @@ describe('build status', () => {
     });
     expect(status).toEqual({
       builtAt: now.toISOString(), version: '1.2.3', trigger: 'content-or-manual',
-      content: { source: 'contentstack', syncedAt: '2026-11-08T17:55:00.000Z', species: 24, posts: snapshot.posts.length },
+      content: { source: 'contentstack', syncedAt: '2026-11-08T17:55:00.000Z', species: snapshot.species.length, posts: snapshot.posts.length },
       tests: passing, level: 'healthy',
     });
   });

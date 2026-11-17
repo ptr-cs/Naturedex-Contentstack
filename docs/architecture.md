@@ -80,7 +80,7 @@ sequenceDiagram
 
 | Part | What it does | Defined in |
 | --- | --- | --- |
-| Contentstack stack | Content types `species` and `blog_post`, 24 species, field notes, drafts, roles and publishing | `contentstack/content-types/` |
+| Contentstack stack | Content types `species` and `blog_post`, 32 species, field notes, drafts, roles and publishing | `contentstack/content-types/` |
 | Content pull | Fetches all published entries, validates them, writes `data/content.json` atomically | `scripts/contentstack/pull.ts`, `src/lib/contentstack.ts` |
 | Static site | Astro renders every route to HTML. React islands add filtering, the map, dialogs and local discoveries. | `src/` |
 | Status page | `/status/` is generated at build time with the content source, counts, test totals and app version | `src/lib/status.ts`, `src/components/SystemStatus.tsx` |

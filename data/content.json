@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "source": "contentstack",
-  "syncedAt": "2026-11-13T00:32:45.754Z",
+  "syncedAt": "2026-11-17T00:28:31.696Z",
   "species": [
     {
       "id": "white-tailed-deer",
@@ -925,6 +925,313 @@
         "https://www.nps.gov/articles/ncbn-species-spotlight-atlantic-horseshoe-crab.htm",
         "https://www.nps.gov/caco/learn/nature/horseshoe-crabs.htm"
       ]
+    },
+    {
+      "id": "eastern-gray-squirrel",
+      "dexNumber": 25,
+      "name": "Eastern Gray Squirrel",
+      "scientificName": "Sciurus carolinensis",
+      "group": "Mammals",
+      "sprite": "https://eu-images.contentstack.com/v3/assets/bltd02904741be28791/blt1f6b05bb570048b4/6afb9efd62cc0a4b3731e3ab/eastern-gray-squirrel.svg",
+      "spriteAnimated": "https://eu-images.contentstack.com/v3/assets/bltd02904741be28791/blta3828a40c89f5d83/6afb9efd8e5c294189c70dc9/eastern-gray-squirrel-animated.svg",
+      "description": "A bushy-tailed tree squirrel with a grizzled gray coat, white underside and a pale fringe along its tail. It does not hibernate, though storms and high winds can keep it in its den for days.",
+      "habitats": [
+        "Woodland",
+        "City park",
+        "Backyard"
+      ],
+      "diet": [
+        "Acorns",
+        "Nuts",
+        "Seeds",
+        "Buds"
+      ],
+      "activity": "Diurnal",
+      "size": {
+        "lengthCm": [
+          30.5,
+          53.3
+        ],
+        "weightKg": [
+          0.45,
+          0.51
+        ],
+        "note": "DWR reports a total length of about 30–53 cm (12–21 in), tail included, and weight of about 450–510 g (16–18 oz)."
+      },
+      "regionIds": [
+        "mountains",
+        "valley",
+        "piedmont",
+        "coastal"
+      ],
+      "regionNote": "Illustrative habitat association; not verified sightings or a distribution map.",
+      "sourceURLs": [
+        "https://dwr.virginia.gov/wildlife/information/gray-squirrel/"
+      ]
+    },
+    {
+      "id": "raccoon",
+      "dexNumber": 26,
+      "name": "Raccoon",
+      "scientificName": "Procyon lotor",
+      "group": "Mammals",
+      "sprite": "https://eu-images.contentstack.com/v3/assets/bltd02904741be28791/bltf787f3029ac0a039/6afb9efde07c8e5d1240859d/raccoon.svg",
+      "spriteAnimated": "https://eu-images.contentstack.com/v3/assets/bltd02904741be28791/blta972bb4ae45c0df0/6afb9efee07c8e39634085a1/raccoon-animated.svg",
+      "description": "A stocky forager with a black mask across its eyes and a bushy tail ringed in black. It stays close to water and is especially common in Tidewater.",
+      "habitats": [
+        "Woodland",
+        "Swamp",
+        "Stream bank"
+      ],
+      "diet": [
+        "Crayfish",
+        "Frogs",
+        "Fruit",
+        "Nuts"
+      ],
+      "activity": "Nocturnal",
+      "size": {
+        "lengthCm": null,
+        "weightKg": [
+          4.5,
+          11.3
+        ],
+        "note": "DWR reports adult weight of about 4.5–11 kg (10–25 lb) and a typical length of about 71 cm (28 in); no length range is given."
+      },
+      "regionIds": [
+        "mountains",
+        "valley",
+        "piedmont",
+        "coastal"
+      ],
+      "regionNote": "Illustrative habitat association; not verified sightings or a distribution map.",
+      "sourceURLs": [
+        "https://dwr.virginia.gov/wildlife/information/raccoon/"
+      ]
+    },
+    {
+      "id": "eastern-bluebird",
+      "dexNumber": 27,
+      "name": "Eastern Bluebird",
+      "scientificName": "Sialia sialis",
+      "group": "Birds",
+      "sprite": "https://eu-images.contentstack.com/v3/assets/bltd02904741be28791/blt743190b9052050f2/6afb9efe62cc0a7ab431e3af/eastern-bluebird.svg",
+      "spriteAnimated": "https://eu-images.contentstack.com/v3/assets/bltd02904741be28791/blt6fc762699e7b9f46/6afb9eff9bd91f7c13cdaa37/eastern-bluebird-animated.svg",
+      "description": "A small thrush that watches from a low perch and drops to the ground for insects. The sprite shows the deep-blue male with his rusty breast; females are grayer with blue in the wings and tail.",
+      "habitats": [
+        "Meadow",
+        "Open field",
+        "Forest edge"
+      ],
+      "diet": [
+        "Insects",
+        "Spiders",
+        "Fruit (fall and winter)"
+      ],
+      "activity": "Diurnal",
+      "size": {
+        "lengthCm": null,
+        "weightKg": null,
+        "note": "The linked NPS guide describes it as bigger than a sparrow but smaller than a robin. A numeric length or mass range is not supplied here."
+      },
+      "regionIds": [
+        "mountains",
+        "valley",
+        "piedmont",
+        "coastal"
+      ],
+      "regionNote": "Illustrative habitat association; not verified sightings or a distribution map.",
+      "sourceURLs": [
+        "https://www.nps.gov/hafe/learn/nature/thrushes.htm",
+        "https://www.nps.gov/shen/learn/nature/2018-year-of-the-bird.htm"
+      ]
+    },
+    {
+      "id": "barred-owl",
+      "dexNumber": 28,
+      "name": "Barred Owl",
+      "scientificName": "Strix varia",
+      "group": "Birds",
+      "sprite": "https://eu-images.contentstack.com/v3/assets/bltd02904741be28791/blt0329b3d4cc567b04/6afb9eff29edfbf72591183b/barred-owl.svg",
+      "spriteAnimated": "https://eu-images.contentstack.com/v3/assets/bltd02904741be28791/blt84f8adc39e4e7616/6afb9f006ea97a1c52df804c/barred-owl-animated.svg",
+      "description": "A large, round-headed owl with no ear tufts, dark eyes and brown-and-white barring. Its call is often written as \"Who cooks for you?\"",
+      "habitats": [
+        "Mature forest",
+        "Wooded swamp",
+        "River bottomland"
+      ],
+      "diet": [
+        "Small mammals",
+        "Birds",
+        "Amphibians",
+        "Reptiles",
+        "Invertebrates"
+      ],
+      "activity": "Nocturnal",
+      "size": {
+        "lengthCm": [
+          40.6,
+          63.5
+        ],
+        "weightKg": null,
+        "note": "NPS reports adult length of about 41–64 cm (16–25 in) and wingspan of about 97–124 cm (38–49 in). Wingspan is not body length."
+      },
+      "regionIds": [
+        "mountains",
+        "valley",
+        "piedmont",
+        "coastal"
+      ],
+      "regionNote": "Illustrative habitat association; not verified sightings or a distribution map.",
+      "sourceURLs": [
+        "https://www.nps.gov/deso/learn/nature/birds.htm",
+        "https://www.nps.gov/pohe/learn/nature/field-guide-birds.htm"
+      ]
+    },
+    {
+      "id": "eastern-fence-lizard",
+      "dexNumber": 29,
+      "name": "Eastern Fence Lizard",
+      "scientificName": "Sceloporus undulatus",
+      "group": "Reptiles",
+      "sprite": "https://eu-images.contentstack.com/v3/assets/bltd02904741be28791/blta6737833dc5959c7/6afb9f00fd4d6c036b1082ae/eastern-fence-lizard.svg",
+      "spriteAnimated": "https://eu-images.contentstack.com/v3/assets/bltd02904741be28791/bltdc71c78ea7ee2cef/6afb9f00be25399855646b02/eastern-fence-lizard-animated.svg",
+      "description": "A rough-scaled gray-brown lizard that basks on logs, fences and tree trunks. Males flash blue patches on the throat and belly, and a threatened lizard bobs in quick push-ups.",
+      "habitats": [
+        "Woodland",
+        "Grassland",
+        "Shrubland"
+      ],
+      "diet": [
+        "Beetles",
+        "Ants",
+        "Grasshoppers",
+        "Spiders"
+      ],
+      "activity": "Diurnal",
+      "size": {
+        "lengthCm": null,
+        "weightKg": null,
+        "note": "The linked NPS pages do not give a length or mass range."
+      },
+      "regionIds": [
+        "mountains",
+        "valley",
+        "piedmont",
+        "coastal"
+      ],
+      "regionNote": "Illustrative habitat association; not verified sightings or a distribution map.",
+      "sourceURLs": [
+        "https://www.nps.gov/nisi/learn/nature/reptiles.htm",
+        "https://www.nps.gov/band/learn/nature/id-reptiles.htm"
+      ]
+    },
+    {
+      "id": "american-toad",
+      "dexNumber": 30,
+      "name": "American Toad",
+      "scientificName": "Anaxyrus americanus",
+      "group": "Amphibians",
+      "sprite": "https://eu-images.contentstack.com/v3/assets/bltd02904741be28791/blt45a0d1fb7b7678e0/6afb9f0129edfb0cdb91183f/american-toad.svg",
+      "spriteAnimated": "https://eu-images.contentstack.com/v3/assets/bltd02904741be28791/blt5e12e82d03491e28/6afb9f011422751e5fc8d6b8/american-toad-animated.svg",
+      "description": "A large, warty toad with raised ridges on its head. Its color ranges from brick red through browns and olive to light gray, and its spring call is a long musical trill.",
+      "habitats": [
+        "Woodland",
+        "Garden",
+        "Wet meadow"
+      ],
+      "diet": [
+        "Insects",
+        "Worms",
+        "Slugs"
+      ],
+      "activity": "Nocturnal",
+      "size": {
+        "lengthCm": null,
+        "weightKg": null,
+        "note": "DWR reports length up to about 10.8 cm (4.25 in) for the Eastern American Toad subspecies."
+      },
+      "regionIds": [
+        "mountains",
+        "valley",
+        "piedmont",
+        "coastal"
+      ],
+      "regionNote": "Illustrative habitat association; not verified sightings or a distribution map.",
+      "sourceURLs": [
+        "https://dwr.virginia.gov/wildlife/information/eastern-american-toad/"
+      ]
+    },
+    {
+      "id": "striped-bass",
+      "dexNumber": 31,
+      "name": "Striped Bass",
+      "scientificName": "Morone saxatilis",
+      "group": "Fish",
+      "sprite": "https://eu-images.contentstack.com/v3/assets/bltd02904741be28791/blt1abc35e423be07c1/6afb9f01f6945b85dd4187b6/striped-bass.svg",
+      "spriteAnimated": "https://eu-images.contentstack.com/v3/assets/bltd02904741be28791/blt0b2628bd8d7ab742/6afb9f025b0f59b23e93bd01/striped-bass-animated.svg",
+      "description": "A streamlined, silvery fish with dark stripes running from gill cover to tail. Chesapeake fish return up tidal rivers to spawn; anglers call it rockfish.",
+      "habitats": [
+        "Tidal river",
+        "Chesapeake Bay",
+        "Reservoir"
+      ],
+      "diet": [
+        "Menhaden",
+        "Herring",
+        "Shad",
+        "Small crustaceans (young)"
+      ],
+      "activity": "Variable",
+      "size": {
+        "lengthCm": null,
+        "weightKg": null,
+        "note": "DWR reports fish over 1.5 m (5 ft) in the lower tidal rivers and 91–102 cm (36–40 in) under ideal conditions elsewhere; no general adult range or mass is supplied here."
+      },
+      "regionIds": [
+        "piedmont",
+        "coastal"
+      ],
+      "regionNote": "Illustrative habitat association; not verified sightings or a distribution map.",
+      "sourceURLs": [
+        "https://dwr.virginia.gov/wildlife/information/striped-bass/"
+      ]
+    },
+    {
+      "id": "common-eastern-firefly",
+      "dexNumber": 32,
+      "name": "Common Eastern Firefly",
+      "scientificName": "Photinus pyralis",
+      "group": "Invertebrates",
+      "sprite": "https://eu-images.contentstack.com/v3/assets/bltd02904741be28791/bltbf7a37d28e782158/6afb9f029777b642268afa2f/common-eastern-firefly.svg",
+      "spriteAnimated": "https://eu-images.contentstack.com/v3/assets/bltd02904741be28791/blt19abf6042ee39e55/6afb9f03f7c80c5a82d3c9d4/common-eastern-firefly-animated.svg",
+      "description": "A beetle, not a fly. At dusk males rise flashing a single sustained yellow light, often tracing a J. Larvae spend a year or two in the soil eating worms and snails.",
+      "habitats": [
+        "Yard",
+        "Meadow",
+        "Forest edge"
+      ],
+      "diet": [
+        "Worms and snails (larva)",
+        "Little or nothing (adult)"
+      ],
+      "activity": "Crepuscular",
+      "size": {
+        "lengthCm": null,
+        "weightKg": null,
+        "note": "The linked NPS pages give no body size. Adults typically live 3–4 weeks."
+      },
+      "regionIds": [
+        "mountains",
+        "valley",
+        "piedmont",
+        "coastal"
+      ],
+      "regionNote": "Illustrative habitat association; not verified sightings or a distribution map.",
+      "sourceURLs": [
+        "https://www.nps.gov/grsm/learn/nature/firefly-flash-patterns.htm",
+        "https://home.nps.gov/cong/learn/nature/synchronous-fireflies-at-congaree.htm"
+      ]
     }
   ],
   "posts": [
@@ -1008,7 +1315,7 @@
   "pages": [
     {
       "id": "about",
-      "eyebrow": "A FIELD GUIDE, WITH A LITTLE NOSTALGIA",
+      "eyebrow": "A FIELD GUIDE, WITH A LOT OF NOSTALGIA",
       "title": "Made for the curious.",
       "intro": "An original, pocket-sized guide to the animals that make Virginia home.",
       "body": "## A familiar feeling. A real wild world.\n\nNaturedex is a Virginia field guide inspired by the curiosity and pixel-filled adventures of handheld games. Its creatures are real Virginia wildlife, and its illustrations are original.\n\n## How to read this guide\n\nThe entries are a curated collection across six animal groups, not a complete checklist of Virginia wildlife. Size measurements describe general adult ranges where a source supports them. Reference links are provided inside each entry.\n\nThe map’s regions are broad habitat guides. Pins mark regions, not animal observations or precise distribution boundaries. They are intended to help you explore the collection.\n\n## Your own field journal\n\nField notes and wildlife entries are authored in Contentstack. Published content is included when the site is built. Your discovery collection is saved only in this browser; signing in to the CMS does not synchronize your collection across devices.\n\n## Accessible exploration\n\nEvery map region has a labeled button. You can explore the complete guide as a list, use the interface with a keyboard, and reduce motion through your device preferences. Automated testing supports this work; manual accessibility evaluation remains an ongoing task.",

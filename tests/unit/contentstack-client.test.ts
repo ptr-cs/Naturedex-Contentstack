@@ -341,11 +341,12 @@ describe('atomic snapshots and safe native import', () => {
       return url.pathname === '/v3/content_types' ? json(body) : json({ entry: { ...(body.entry as CmsEntry), uid: 'created_' + (++created) } });
     });
     const result = await importMissingContent(seed, management, fetchImpl);
-    expect(result).toMatchObject({ createdModels: 4, uploadedSprites: 48, createdSpecies: 24, createdPosts: 4, createdSettings: 1, createdPages: 1, published: 0 });
-    expect(writes).toHaveLength(35); // 4 models + 1 folder + 24 species + 4 posts + settings + about page
+    const species = seed.species.length;
+    expect(result).toMatchObject({ createdModels: 4, uploadedSprites: species * 2, createdSpecies: species, createdPosts: 4, createdSettings: 1, createdPages: 1, published: 0 });
+    expect(writes).toHaveLength(4 + 1 + species + 4 + 1 + 1); // models, folder, species, posts, settings, about page
     expect(writes.find((write) => write.path.includes('/site_settings/entries'))!.body.entry).toEqual(siteSettingsEntry(seed.site));
     expect(writes.find((write) => write.path.includes('/page/entries'))!.body.entry).toMatchObject({ stable_id: 'about', link_url: seed.pages[0].link!.url });
-    expect(uploads).toHaveLength(48);
+    expect(uploads).toHaveLength(species * 2);
     expect(uploads.every((upload) => upload.type === 'image/svg+xml' && upload.folder === 'sprite_folder')).toBe(true);
     expect(uploads.map((upload) => upload.name)).toContain(`${seed.species[0].id}-animated.svg`);
     const firstSpecies = writes.find((write) => write.path.includes('/species/entries'))!.body.entry as CmsEntry;

@@ -59,6 +59,26 @@
     "frames": 3,
     "duration": 6.1
   },
+  "eastern-gray-squirrel": {
+    "description": "The curled tip of the bushy tail flicks upward, then the squirrel blinks.",
+    "frames": 3,
+    "duration": 4.8
+  },
+  "raccoon": {
+    "description": "The ringed tail lifts a pixel and one ear twitches.",
+    "frames": 3,
+    "duration": 5.4
+  },
+  "eastern-bluebird": {
+    "description": "The blue tail feathers flick upward and the bird blinks.",
+    "frames": 3,
+    "duration": 5
+  },
+  "barred-owl": {
+    "description": "Both dark eyes half close, then shut in a slow daytime blink.",
+    "frames": 3,
+    "duration": 6.2
+  },
   "american-bullfrog": {
     "description": "The pale throat gently expands, then both eyes briefly close.",
     "frames": 3,
@@ -118,5 +138,25 @@
     "description": "The long tail shifts side to side with a small twitch of the rear edges.",
     "frames": 3,
     "duration": 2.4
+  },
+  "eastern-fence-lizard": {
+    "description": "The long tail tip lifts a pixel, then the lizard blinks.",
+    "frames": 3,
+    "duration": 5.3
+  },
+  "american-toad": {
+    "description": "The pale throat pulses, then the raised eye briefly closes.",
+    "frames": 3,
+    "duration": 3.6
+  },
+  "striped-bass": {
+    "description": "The forked tail beats while the spiny dorsal fin flexes.",
+    "frames": 3,
+    "duration": 1.6
+  },
+  "common-eastern-firefly": {
+    "description": "The wings beat back and forth while sparks drift from the glowing lantern.",
+    "frames": 3,
+    "duration": 1.2
   }
 }

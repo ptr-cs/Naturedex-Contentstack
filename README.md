@@ -1,6 +1,6 @@
 # Naturedex · Contentstack
 
-The first Naturedex CMS comparison: **Contentstack + Astro + React + TypeScript**. It reuses Naturedex’s original visual design, 24 animated wildlife sprites, Virginia map, collection tracking, and four previously published field notes.
+The first Naturedex CMS comparison: **Contentstack + Astro + React + TypeScript**. It reuses Naturedex’s original visual design, 32 animated wildlife sprites, Virginia map, collection tracking, and four previously published field notes.
 
 Astro generates HTML for every route. React supplies filtering, map selection, dialogs, motion controls, and browser-local discoveries. Contentstack owns wildlife entries, blog posts, references, user accounts, roles, drafts, and publishing. There is no application database or custom login service.
 
