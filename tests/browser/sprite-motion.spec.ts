@@ -1,12 +1,14 @@
 import { expect, test, type Page, type TestInfo } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
-import { readFileSync } from 'node:fs';
+import { readFileSync, readdirSync } from 'node:fs';
 import { pathToFileURL } from 'node:url';
 import { resolve } from 'node:path';
 
 const species = JSON.parse(readFileSync(new URL('../../data/content.json', import.meta.url), 'utf8')).species as Array<{
   id: string; name: string;
 }>;
+// Repository source art only; species created in Contentstack have none here.
+const sourceArt = readdirSync(resolve('art/sprites/animated')).filter(file => file.endsWith('.svg')).map(file => ({ id: file.slice(0, -4) }));
 
 test.use({ reducedMotion: 'no-preference' });
 
@@ -101,9 +103,9 @@ test('a deliberate pause survives operating-system preference changes', async ({
   expect(await page.evaluate(() => localStorage.getItem('naturedex.motion.v1'))).toBe('paused');
 });
 
-test('every sprite actually cycles through its poses and honors its own reduced-motion fallback', async ({ page }) => {
+test('every repository sprite actually cycles through its poses and honors its own reduced-motion fallback', async ({ page }) => {
   test.setTimeout(60_000);
-  for (const entry of species) {
+  for (const entry of sourceArt) {
     await page.emulateMedia({ reducedMotion: 'no-preference' });
     // The source art in the repository, as uploaded to the asset library.
     await page.goto(pathToFileURL(resolve(`art/sprites/animated/${entry.id}.svg`)).href);

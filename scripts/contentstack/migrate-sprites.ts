@@ -70,8 +70,10 @@ export async function plan(config: ManagementConfig, fetchImpl: typeof fetch = f
   const folder = await findSpriteFolder(config, fetchImpl);
   const existing = await existingSprites(config, folder, fetchImpl);
   let toUpload = 0;
-  for (const { id } of species) {
-    const files = spriteFiles(id);
+  for (const { id, entry } of species) {
+    // Entries already linked to assets (including species created in Contentstack) need nothing.
+    const files = assetUid(entry.sprite_image) ? null : spriteFiles(id);
+    if (!files) continue;
     if (!existing.has(files.still.name)) toUpload++;
     if (files.animated && !existing.has(files.animated.name)) toUpload++;
   }
@@ -101,7 +103,9 @@ export async function apply(config: ManagementConfig, environment: string, fetch
 
   // 2. Upload whatever is missing from the asset library.
   const species = speciesRefs(await speciesEntries(config, fetchImpl));
-  const { assets, uploaded, folderCreated } = await ensureSpriteAssets(config, species, fetchImpl);
+  const { assets, uploaded, folderCreated } = await ensureSpriteAssets(config, species.map(({ id, name, entry }) => ({
+    id, name, linked: { still: assetUid(entry.sprite_image), animated: assetUid(entry.sprite_animation) },
+  })), fetchImpl);
 
   // 3. Link each entry to its assets. The whole entry is sent so no field is lost.
   let linked = 0;

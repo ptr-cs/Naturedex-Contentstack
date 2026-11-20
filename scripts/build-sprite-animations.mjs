@@ -1,10 +1,11 @@
-import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
+import { readFileSync, readdirSync, writeFileSync, mkdirSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
 const source = (name) => resolve(root, name);
-const { species } = JSON.parse(readFileSync(source('data/content.json'), 'utf8'));
+// Builds animations for the source art kept in this repository. Species created
+// in Contentstack bring their own sprites and need nothing here.
 const plans = [
   ...JSON.parse(
     readFileSync(source('data/sprite-motion-vertebrates.json'), 'utf8'),
@@ -107,9 +108,8 @@ function keyframes(sequence, frame) {
   return `@keyframes frame-${frame}{${stops.join('')}}`;
 }
 for (const plan of plans) {
-  const entry = species.find((s) => s.id === plan.id);
-  if (!entry || ids.has(plan.id))
-    throw new Error(`Unknown or duplicate species ${plan.id}`);
+  if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(plan.id) || ids.has(plan.id))
+    throw new Error(`Invalid or duplicate plan ${plan.id}`);
   if (
     plan.frames.length !== 3 ||
     !plan.sequence.length ||
@@ -121,7 +121,11 @@ for (const plan of plans) {
   if (!(plan.duration >= 1 && plan.duration <= 12) || plan.frames[0].length)
     throw new Error(`Invalid timing or resting frame for ${plan.id}`);
   ids.add(plan.id);
-  const original = readFileSync(source(`art/sprites/${entry.id}.svg`), 'utf8');
+  const original = readFileSync(source(`art/sprites/${plan.id}.svg`), 'utf8');
+  const name = /<title[^>]*>Original pixel illustration of (.+?)<\/title>/.exec(
+    original,
+  )?.[1];
+  if (!name) throw new Error(`art/sprites/${plan.id}.svg needs its <title>.`);
   const base = pixels(original);
   const frames = plan.frames.map((ops) => {
     const frame = base.map((row) => [...row]);
@@ -141,7 +145,7 @@ for (const plan of plans) {
       .join('') +
     frames.map((_, i) => keyframes(plan.sequence, i)).join('') +
     '@media(prefers-reduced-motion:reduce){.sprite-frame{animation:none!important;opacity:0!important}.frame-0{opacity:1!important}}';
-  const title = `Original animated pixel illustration of ${entry.name.replaceAll('&', '&amp;')}`;
+  const title = `Original animated pixel illustration of ${name}`;
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" role="img" aria-labelledby="title" shape-rendering="crispEdges" data-species="${plan.id}" data-sprite-frames="3"><title id="title">${title}</title><style>${css}</style>${frames.map((markup, i) => `<g class="sprite-frame frame-${i}" data-frame="${i}">${markup}</g>`).join('')}</svg>\n`;
   writeFileSync(source(`art/sprites/animated/${plan.id}.svg`), svg);
   metadata[plan.id] = {
@@ -150,8 +154,12 @@ for (const plan of plans) {
     duration: plan.duration,
   };
 }
-if (ids.size !== species.length)
-  throw new Error('Every species must have an animation plan.');
+const unplanned = readdirSync(source('art/sprites'))
+  .filter((file) => file.endsWith('.svg'))
+  .map((file) => file.slice(0, -4))
+  .filter((id) => !ids.has(id));
+if (unplanned.length)
+  throw new Error(`Source art without an animation plan: ${unplanned.join(', ')}`);
 writeFileSync(
   source('art/sprites/animated/manifest.json'),
   JSON.stringify(metadata, null, 2) + '\n',

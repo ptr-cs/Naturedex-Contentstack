@@ -79,6 +79,13 @@ describe('sprite migration', () => {
     expect(state.calls.some((call) => call.method === 'PUT' || call.path === '/v3/assets/folders')).toBe(false);
   });
 
+  it('leaves an entry created in Contentstack, already linked and with no repository art, untouched', async () => {
+    const { state, fetchImpl } = stack([{ stable_id: 'cms-only-test-animal', sprite_image: { uid: 'linked1' } }, {}]);
+    expect(await plan(config, fetchImpl)).toMatchObject({ assetsToUpload: 2, entriesToLink: 1 });
+    expect(await apply(config, 'production', fetchImpl)).toMatchObject({ uploaded: 2, linked: 1 });
+    expect(state.calls.some((call) => call.method === 'PUT' && call.path.endsWith('/entries/e1'))).toBe(false);
+  });
+
   it('finalizes only when every entry has a sprite, then removes the old field and requires the new one', async () => {
     const unlinked = stack([{ sprite_image: 'a1' }, {}]);
     await expect(finalize(config, unlinked.fetchImpl)).rejects.toThrow('red-fox');

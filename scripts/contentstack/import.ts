@@ -126,7 +126,7 @@ export async function importMissingContent(snapshotInput: ContentSnapshot, confi
   }
   let createdSpecies = 0; let createdPosts = 0;
   const missingSpecies = snapshot.species.filter((species) => !speciesById.has(species.id));
-  const sprites = missingSpecies.length ? await ensureSpriteAssets(config, missingSpecies, fetchImpl) : { assets: new Map<string, SpriteAssets>(), uploaded: 0 };
+  const sprites = missingSpecies.length ? await ensureSpriteAssets(config, missingSpecies.map(({ id, name, sprite, spriteAnimated }) => ({ id, name, urls: { still: sprite, animated: spriteAnimated } })), fetchImpl) : { assets: new Map<string, SpriteAssets>(), uploaded: 0 };
   for (const species of missingSpecies) {
     const created = await create('species', speciesEntry(species, sprites.assets.get(species.id)!));
     uidById.set(species.id, created.uid as string); createdSpecies++;
@@ -150,7 +150,7 @@ export async function main(): Promise<void> {
   if (args.some((argument) => argument !== '--apply')) throw new Error('Usage: npm run cms:import [-- --apply]');
   const snapshot = readContentSnapshot();
   if (!args.includes('--apply')) {
-    console.log(JSON.stringify({ mode: 'dry-run', source: 'data/content.json', proposedModels: readModels().map((model) => model.content_type.uid), proposedSpecies: snapshot.species.length, proposedSpriteFiles: 'art/sprites/', proposedPosts: snapshot.posts.length, proposedSiteSettings: 1, proposedPages: snapshot.pages.map((page) => page.id), remoteStateChecked: false, remoteRequests: 0, note: 'Offline proposal only. --apply creates missing content; existing content stays unchanged and nothing is published.' }));
+    console.log(JSON.stringify({ mode: 'dry-run', source: 'data/content.json', proposedModels: readModels().map((model) => model.content_type.uid), proposedSpecies: snapshot.species.length, proposedSpriteSources: 'art/sprites/ when present, otherwise the published asset', proposedPosts: snapshot.posts.length, proposedSiteSettings: 1, proposedPages: snapshot.pages.map((page) => page.id), remoteStateChecked: false, remoteRequests: 0, note: 'Offline proposal only. --apply creates missing content; existing content stays unchanged and nothing is published.' }));
     return;
   }
   console.log(JSON.stringify(await importMissingContent(snapshot, getManagementConfig())));

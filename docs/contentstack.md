@@ -34,7 +34,9 @@ Each species' pixel art is an SVG in the asset library's **Naturedex sprites** f
 
 To add a species with new art: upload the SVG (or two, still and animated) to **Naturedex sprites**, pick them in the entry's Sprite fields, then publish the assets and the entry. No code change is needed. A pull rejects a sprite that isn't an SVG, is over 512 KB, or isn't served from a Contentstack image host.
 
-The original art and its generator stay in the repository (`art/sprites/`, `npm run sprites:build`). `npm run cms:migrate-sprites` moved them into the library: a read-only plan by default, `-- --apply` to upload, link and publish, and `-- --finalize` to remove the old text field. It's safe to rerun.
+Contentstack is the only place a sprite needs to exist. The repository does not need a copy, and neither the deploy nor its tests look for one.
+
+`art/sprites/` is an optional workshop: the original pixel art, its animation plans (`data/sprite-motion-*.json`) and a generator (`npm run sprites:build`) that turns a still sprite into its three-pose animated version. Use it to make art if you like, then upload the results. Its tests check only the art that is there. `npm run cms:migrate-sprites` moved the original art into the library: a read-only plan by default, `-- --apply` to upload, link and publish, and `-- --finalize` to remove the old text field. It's safe to rerun and leaves entries that already have sprites alone. The bootstrap importer uses repository art when present and otherwise copies a species' published sprite from Contentstack's image CDN.
 
 ### Site copy and pages
 

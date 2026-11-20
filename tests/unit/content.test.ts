@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { readFileSync, existsSync } from 'node:fs';
-import { resolve } from 'node:path';
+import { validateContentSnapshot } from '../../src/lib/content.ts';
+import { readFileSync } from 'node:fs';
 
 const species = JSON.parse(
   readFileSync(new URL('../../data/content.json', import.meta.url), 'utf8'),
@@ -49,12 +49,11 @@ describe('the Virginia field-guide content contract', () => {
     }
   });
 
-  it('serves sprites from the asset library, keeps their source art, and distinguishes regional guidance from observations', () => {
+  it('serves sprites from the asset library and distinguishes regional guidance from observations', () => {
     const regions = new Set(['mountains', 'valley', 'piedmont', 'coastal']);
     for (const entry of species) {
       expect(new URL(entry.sprite).pathname).toMatch(/^\/v3\/assets\/.+\.svg$/);
       expect(entry.spriteAnimated === null || new URL(entry.spriteAnimated).pathname.endsWith('-animated.svg')).toBe(true);
-      expect(existsSync(resolve(process.cwd(), `art/sprites/${entry.id}.svg`))).toBe(true);
       expect(entry.regionIds.length).toBeGreaterThan(0);
       for (const region of entry.regionIds)
         expect(regions.has(region)).toBe(true);
@@ -108,5 +107,15 @@ describe('journal publication integrity', () => {
     expect(coordinates.length).toBeGreaterThan(50);
     expect(coordinates.every(([lon, lat]) => lon > -84 && lon < -75 && lat > 36 && lat < 40)).toBe(true);
     for (const region of ['mountains', 'valley', 'piedmont', 'coastal']) expect(species.some(entry => entry.regionIds.includes(region))).toBe(true);
+  });
+
+  it('accepts a species published only in Contentstack, with no copy of its art in the repository', () => {
+    const snapshot = JSON.parse(readFileSync(new URL('../../data/content.json', import.meta.url), 'utf8'));
+    const template = snapshot.species[0];
+    const id = 'cms-only-test-animal';
+    const asset = (name: string) => `https://eu-images.contentstack.com/v3/assets/blt0/blt1/1/${name}`;
+    snapshot.species.push({ ...template, id, name: 'CMS-only Test Animal', dexNumber: 9999, sprite: asset(`${id}.svg`), spriteAnimated: asset(`${id}-animated.svg`) });
+    const validated = validateContentSnapshot(snapshot);
+    expect(validated.species.some(entry => entry.id === id)).toBe(true);
   });
 });

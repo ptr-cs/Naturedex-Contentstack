@@ -10,6 +10,7 @@ import {
 } from '../../src/lib/contentstack.ts';
 import { importMissingContent, pageEntry, postEntry, readModels, siteSettingsEntry, speciesEntry } from '../../scripts/contentstack/import.ts';
 import { writeSnapshotAtomically } from '../../scripts/contentstack/pull.ts';
+import { ensureSpriteAssets } from '../../scripts/contentstack/assets.ts';
 
 const seed = readContentSnapshot();
 const env = {
@@ -323,6 +324,11 @@ describe('atomic snapshots and safe native import', () => {
     const writes: { path: string; body: CmsEntry }[] = [];
     const uploads: { name: string; type: string; folder: unknown }[] = [];
     const fetchImpl = mockFetch(async (url, init) => {
+      // Species with no repository art are copied from their published sprite, without credentials.
+      if (url.hostname.endsWith('-images.contentstack.com')) {
+        expect(init.headers).toBeUndefined();
+        return new Response('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48"></svg>', { status: 200 });
+      }
       expect(init.headers).toMatchObject({ authorization: env.CONTENTSTACK_MANAGEMENT_TOKEN });
       // A fresh stack: Contentstack omits `count` on empty lists.
       if (init.method === 'GET') return json(url.pathname === '/v3/content_types' ? { content_types: [] } : url.pathname === '/v3/assets' ? { assets: [] } : { entries: [] });
@@ -357,6 +363,23 @@ describe('atomic snapshots and safe native import', () => {
     expect(entry.related_species).toEqual(seed.posts[0].relatedSpeciesIds.map((id) => ({ uid: 'created_' + (seed.species.findIndex((species) => species.id === id) + 1), _content_type_uid: 'species' })));
     expect(entry).not.toHaveProperty('created_at');
     expect(entry).not.toHaveProperty('updated_at');
+  });
+
+  it('copies the published sprite of a species that has no art in the repository, only from Contentstack', async () => {
+    const id = 'cms-only-test-animal';
+    const cdn = `https://eu-images.contentstack.com/v3/assets/blt0/blt1/1/${id}.svg`;
+    const uploads: string[] = [];
+    const fetchImpl = mockFetch(async (url, init) => {
+      if (url.href === cdn) return new Response('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48"></svg>', { status: 200 });
+      if (url.pathname === '/v3/assets' && init.method === 'POST') { uploads.push(((init.body as FormData).get('asset[upload]') as File).name); return json({ asset: { uid: 'copied' } }); }
+      if (url.pathname === '/v3/assets/folders') return json({ asset: { uid: 'sprite_folder' } });
+      return json({ assets: [] });
+    });
+    const result = await ensureSpriteAssets(management, [{ id, name: 'CMS-only', urls: { still: cdn, animated: null } }], fetchImpl);
+    expect(result.assets.get(id)).toEqual({ still: 'copied', animated: null });
+    expect(uploads).toEqual([`${id}.svg`]);
+    await expect(ensureSpriteAssets(management, [{ id, name: 'CMS-only', urls: { still: 'https://evil.example/x.svg', animated: null } }], fetchImpl))
+      .rejects.toThrow('only Contentstack');
   });
 
   it('refuses to overwrite an incompatible model before any writes', async () => {

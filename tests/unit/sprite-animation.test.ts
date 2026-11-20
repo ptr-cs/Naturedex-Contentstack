@@ -3,9 +3,13 @@ import { readFileSync, readdirSync } from 'node:fs';
 import { createHash } from 'node:crypto';
 import { resolve } from 'node:path';
 
-const species = JSON.parse(readFileSync(new URL('../../data/content.json', import.meta.url), 'utf8')).species as Array<{
-  id: string; name: string;
-}>;
+// The source art kept in this repository. Published species may have none:
+// their sprites live only in Contentstack and are checked by the content pull.
+const species = readdirSync(resolve(process.cwd(), 'art/sprites')).filter(file => file.endsWith('.svg')).map(file => {
+  const id = file.slice(0, -4);
+  const name = /<title[^>]*>Original pixel illustration of (.+?)<\/title>/.exec(readFileSync(resolve(process.cwd(), 'art/sprites', file), 'utf8'))?.[1];
+  return { id, name: name ?? '' };
+});
 
 function attribute(markup: string, name: string) {
   return new RegExp(`\\b${name}=["']([^"']*)["']`).exec(markup)?.[1];
@@ -36,8 +40,10 @@ function pixels(markup: string, label: string) {
   return createHash('sha256').update(JSON.stringify(grid)).digest('hex');
 }
 
-describe('the original animal sprites and their animated counterparts', () => {
-  it('provides exactly one three-frame animation for every animal', () => {
+describe('the repository source art and its animated counterparts', () => {
+  it('provides exactly one three-frame animation for every source sprite', () => {
+    expect(species.length).toBeGreaterThan(0);
+    expect(species.every(entry => entry.name), 'every source sprite has its title').toBe(true);
     const files = readdirSync(resolve(process.cwd(), 'art/sprites/animated')).filter(file => file.endsWith('.svg'));
     expect(files.sort()).toEqual(species.map(entry => `${entry.id}.svg`).sort());
     for (const entry of species) {
