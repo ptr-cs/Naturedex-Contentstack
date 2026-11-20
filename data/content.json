@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "source": "contentstack",
-  "syncedAt": "2026-11-17T00:28:31.696Z",
+  "syncedAt": "2026-11-20T13:45:10.629Z",
   "species": [
     {
       "id": "white-tailed-deer",
@@ -1231,6 +1231,47 @@
       "sourceURLs": [
         "https://www.nps.gov/grsm/learn/nature/firefly-flash-patterns.htm",
         "https://home.nps.gov/cong/learn/nature/synchronous-fireflies-at-congaree.htm"
+      ]
+    },
+    {
+      "id": "virginia-opossum",
+      "dexNumber": 33,
+      "name": "Virginia Opossum",
+      "scientificName": "Didelphis virginiana",
+      "group": "Mammals",
+      "sprite": "https://eu-images.contentstack.com/v3/assets/bltd02904741be28791/bltb18150e7d58fe470/6b004a44d61f59729d23c47c/virginia-opossum.svg",
+      "spriteAnimated": "https://eu-images.contentstack.com/v3/assets/bltd02904741be28791/blt93afd3f20044122d/6b004a44c3712a8d146d1d3a/virginia-opossum-animated.svg",
+      "description": "A housecat-sized marsupial with a white face, pink nose, large bare ears and a long prehensile tail. Long white hairs over black-tipped underfur give it a grizzled look, and when badly threatened it may \"play possum.\"",
+      "habitats": [
+        "Woodland",
+        "Stream bank",
+        "Swamp",
+        "Backyard"
+      ],
+      "diet": [
+        "Fruit",
+        "Grain",
+        "Plant matter",
+        "Carrion"
+      ],
+      "activity": "Nocturnal",
+      "size": {
+        "lengthCm": null,
+        "weightKg": [
+          4.1,
+          5.9
+        ],
+        "note": "DWR reports an average weight of 9–13 lb (about 4.1–5.9 kg) and an average Virginia length of 678 mm (about 68 cm) not including the 296 mm (about 30 cm) tail; no length range is given."
+      },
+      "regionIds": [
+        "mountains",
+        "valley",
+        "piedmont",
+        "coastal"
+      ],
+      "regionNote": "Illustrative habitat association; not verified sightings or a distribution map.",
+      "sourceURLs": [
+        "https://dwr.virginia.gov/wildlife/information/virginia-opossum/"
       ]
     }
   ],

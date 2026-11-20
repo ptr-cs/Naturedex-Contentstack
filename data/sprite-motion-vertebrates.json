@@ -606,5 +606,49 @@
         }
       ]
     ]
+  },
+  {
+    "id": "virginia-opossum",
+    "description": "The pink nose sniffs forward a pixel, one bare ear dips, and the opossum gives a slow blink.",
+    "duration": 5.6,
+    "sequence": [
+      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 2, 0
+    ],
+    "frames": [
+      [],
+      [
+        {
+          "type": "move",
+          "bounds": [44, 18, 46, 20],
+          "dx": 1,
+          "dy": 0
+        }
+      ],
+      [
+        {
+          "type": "move",
+          "bounds": [44, 18, 46, 20],
+          "dx": 1,
+          "dy": 0
+        },
+        {
+          "type": "move",
+          "bounds": [32, 12, 38, 14],
+          "dx": 0,
+          "dy": 1,
+          "colors": ["#26382d", "#2e3130"]
+        },
+        {
+          "type": "blink",
+          "bounds": [40, 18, 40, 18],
+          "color": "#fff6d9"
+        },
+        {
+          "type": "paint",
+          "bounds": [40, 19, 40, 19],
+          "color": "#26302a"
+        }
+      ]
+    ]
   }
 ]
